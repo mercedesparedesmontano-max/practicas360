@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "cd ../FrontEnd && npm install && npm run build && cd ../BackEnd && tsc",
-    "start": "node dist/src/app.js",
+    "build": "cd ../FrontEnd && npm install && npm run build && cd ../BackEnd && npx prisma generate && npx tsc",
+    "start": "node dist/app.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate"
   },
