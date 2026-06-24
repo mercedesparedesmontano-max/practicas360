@@ -1,0 +1,81 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ALUMNO
+  PROFESOR
+  SUPERVISOR
+}
+
+enum ApprovalStatus {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentProfile  StudentProfile? @relation("StudentUser")
+  tutoredStudents StudentProfile[] @relation("AcademicTutor")
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id                         String   @id @default(uuid())
+  userId                     String   @unique
+  fullName                   String
+  nationalId                 String   @unique
+  faculty                    String
+  career                     String
+  cycle                      String
+  parallel                   String
+  companyName                String
+  technicalArea              String
+  officialStartDate          DateTime
+  tentativeEndDate           DateTime
+  academicTutorId            String?
+  companySupervisorName      String?
+  companySupervisorPosition  String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  user          User          @relation("StudentUser", fields: [userId], references: [id], onDelete: Cascade)
+  academicTutor User?         @relation("AcademicTutor", fields: [academicTutorId], references: [id], onDelete: SetNull)
+  dailyReports  DailyReport[]
+
+  @@index([faculty, career, cycle, parallel])
+  @@index([academicTutorId])
+  @@map("student_profiles")
+}
+
+model DailyReport {
+  id                    String         @id @default(uuid())
+  studentProfileId      String
+  reportDate            DateTime
+  executedHours         Decimal        @db.Decimal(5, 2)
+  technicalDescription  String
+  operationalNotes      String?
+  approvalStatus        ApprovalStatus @default(PENDIENTE)
+  feedback              String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, reportDate])
+  @@index([approvalStatus])
+  @@map("daily_reports")
+}

@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentación Técnica - Prácticas 360</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: #0f172a; background: #fff; line-height: 1.7; }
+  .page { max-width: 210mm; margin: 0 auto; padding: 25mm 18mm; }
+  @media print {
+    @page { margin: 20mm 22mm 25mm; size: A4; }
+    @page:first { margin-top: 0; }
+    body { font-size: 10.5pt; line-height: 1.65; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 0; page-break-after: always; margin: 0; max-width: 100%; box-shadow: none; }
+    .page:last-child { page-break-after: auto; }
+    .no-break { page-break-inside: avoid; }
+    .print-btn { display: none !important; }
+    .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .cover .shield { box-shadow: none; }
+    h2.section { margin-top: 0; }
+    svg { max-width: 100% !important; page-break-inside: avoid; }
+    .svg-flow, .svg-diagram { max-width: 100% !important; border: 0.5pt solid #cbd5e1; }
+    .flow { page-break-inside: avoid; border: 0.5pt solid #e2e8f0; }
+    table { page-break-inside: avoid; font-size: 9pt; }
+    .card { page-break-inside: avoid; }
+    .card-grid { grid-template-columns: 1fr 1fr; }
+    .note { page-break-inside: avoid; }
+    a { color: #007A33; text-decoration: none; }
+    .toc-page { display: none; }
+    img, .card-item, .badge { page-break-inside: avoid; }
+    .sep { margin: 16px 0; }
+  }
+
+  /* PORTADA */
+  .cover { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 95vh; text-align: center; position: relative; }
+  .cover::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #007A33 0%, #007A33 50%, #E60000 50%, #E60000 100%); }
+  .cover .shield { width: 80px; height: 80px; background: #007A33; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0,122,51,0.2); }
+  .cover .shield svg { width: 40px; height: 40px; fill: white; }
+  .cover h1 { font-size: 52px; font-weight: 900; color: #007A33; letter-spacing: -1.5px; margin-bottom: 4px; }
+  .cover h2 { font-size: 22px; font-weight: 600; color: #E60000; margin-bottom: 24px; letter-spacing: 1px; }
+  .cover .line { width: 240px; height: 5px; background: linear-gradient(90deg, #007A33, #E60000); margin: 20px auto; border-radius: 3px; }
+  .cover .subtitle { font-size: 15px; color: #475569; font-weight: 600; margin-top: 20px; letter-spacing: 0.5px; }
+  .cover .meta { margin-top: 40px; display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+  .cover .meta-item { text-align: center; }
+  .cover .meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; font-weight: 700; }
+  .cover .meta-value { font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+
+  /* TIPOGRAFÍA */
+  h2.section { font-size: 26px; font-weight: 800; color: #007A33; margin-top: 10px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 3px solid #007A33; display: flex; align-items: center; gap: 10px; }
+  h2.section .num { background: #007A33; color: white; font-size: 16px; width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  h3 { font-size: 18px; font-weight: 700; color: #1e293b; margin-top: 24px; margin-bottom: 10px; padding-left: 0; }
+  h3.sub { font-size: 15px; font-weight: 700; color: #475569; margin-top: 18px; margin-bottom: 8px; border-left: 3px solid #007A33; padding-left: 10px; }
+  h4 { font-size: 13px; font-weight: 700; color: #334155; margin-top: 14px; margin-bottom: 6px; }
+
+  p { font-size: 11.5px; margin-bottom: 8px; text-align: justify; line-height: 1.8; color: #1e293b; }
+  p strong { color: #0f172a; }
+
+  /* LISTAS */
+  ul, ol { margin: 6px 0 12px 22px; }
+  ul li, ol li { font-size: 11.5px; margin-bottom: 4px; line-height: 1.7; color: #1e293b; }
+  ul li { list-style: disc; }
+  ul li ul { margin: 2px 0 4px 20px; }
+  ul li ul li { list-style: circle; }
+
+  /* TABLAS */
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 10.5px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  thead th { background: #007A33; color: #fff; padding: 9px 12px; text-align: left; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  thead th:first-child { border-top-left-radius: 8px; }
+  thead th:last-child { border-top-right-radius: 8px; }
+  tbody td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #f8fafc; }
+  tbody tr:hover td { background: #f1f5f9; }
+  tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+  tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+
+  /* FLOW MONOSPACE */
+  .flow { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 10px; background: #f1f5f9; padding: 14px 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin: 8px 0 16px; line-height: 1.9; white-space: pre; overflow-x: auto; color: #1e293b; }
+  .flow .arrow { color: #007A33; font-weight: 700; }
+  .flow .comment { color: #94a3b8; font-style: italic; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #f3e8ff; color: #6b21a8; }
+
+  /* NOTAS */
+  .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 12px 0; font-size: 10.5px; border-radius: 6px; color: #78350f; line-height: 1.6; }
+  .note.info { background: #eff6ff; border-left-color: #3b82f6; color: #1e3a5f; }
+  .note.warn { background: #fef2f2; border-left-color: #ef4444; color: #7f1d1d; }
+  .note.success { background: #f0fdf4; border-left-color: #22c55e; color: #14532d; }
+
+  /* CARDS */
+  .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin: 12px 0; }
+  .card-title { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media print { .card-grid { grid-template-columns: 1fr 1fr; } }
+  .card-item { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+  .card-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; }
+  .card-value { font-size: 13px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+  .card-desc { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+  /* TAB INDEX */
+  .toc { margin: 20px 0; }
+  .toc-item { display: flex; justify-content: space-between; padding: 6px 8px; font-size: 11px; border-radius: 4px; transition: background 0.2s; }
+  .toc-item:hover { background: #f1f5f9; }
+  .toc-item.main { font-weight: 700; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+  .toc-item.sub { padding-left: 28px; color: #475569; font-size: 10.5px; }
+  .toc-num { color: #007A33; font-weight: 700; margin-right: 8px; }
+  .toc-page { color: #94a3b8; font-size: 10px; }
+
+  /* CODE INLINE */
+  code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 10px; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #007A33; border: 1px solid #e2e8f0; }
+
+  /* SEPARADOR */
+  .sep { height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 24px 0; }
+
+  /* FOOTER */
+  .footer { margin-top: 30px; padding-top: 10px; font-size: 9px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; }
+
+  /* PRINT BUTTON */
+  .print-btn { position: fixed; bottom: 24px; right: 24px; padding: 14px 24px; background: #007A33; color: #fff; border: none; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(0,122,51,0.3); z-index: 1000; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .print-btn:hover { background: #005922; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,122,51,0.4); }
+  .print-btn svg { width: 18px; height: 18px; fill: white; }
+
+  /* SVG DIAGRAMS */
+  .svg-diagram { width: 100%; max-width: 620px; height: auto; margin: 8px auto 16px; display: block; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px; }
+  .svg-diagram text { font-family: 'Inter', 'Segoe UI', sans-serif; }
+  .svg-diagram .box-client { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; rx: 8; }
+  .svg-diagram .box-frontend { fill: #dcfce7; stroke: #007A33; stroke-width: 1.5; rx: 6; }
+  .svg-diagram .box-backend { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; rx: 6; }
+  .svg-diagram .box-db { fill: #f3e8ff; stroke: #7c3aed; stroke-width: 1.5; rx: 6; }
+  .svg-diagram .box-ai { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; rx: 6; }
+  .svg-diagram .arrow-line { stroke: #94a3b8; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+  .svg-diagram .arrow-dashed { stroke: #94a3b8; stroke-width: 2; fill: none; stroke-dasharray: 5,4; marker-end: url(#arrowhead); }
+  .svg-diagram .label-title { font-size: 11px; font-weight: 700; fill: #0f172a; }
+  .svg-diagram .label-sub { font-size: 9px; fill: #475569; }
+  .svg-diagram .label-tech { font-size: 8px; fill: #64748b; }
+  .svg-diagram .label-step { font-size: 9px; font-weight: 600; fill: #334155; }
+  .svg-diagram .icon-bg { fill: white; opacity: 0.9; }
+
+  /* FLOW SVG */
+  .svg-flow { width: 100%; max-width: 620px; height: auto; margin: 8px auto 16px; display: block; border-radius: 10px; background: #fafafa; border: 1px solid #e2e8f0; padding: 4px; }
+  .svg-flow .flow-box { fill: white; stroke: #cbd5e1; stroke-width: 1.5; rx: 6; }
+  .svg-flow .flow-box-action { fill: #f0fdf4; stroke: #007A33; stroke-width: 1.5; rx: 6; }
+  .svg-flow .flow-box-db { fill: #faf5ff; stroke: #7c3aed; stroke-width: 1.5; rx: 6; }
+  .svg-flow .flow-box-decision { fill: #fffbeb; stroke: #f59e0b; stroke-width: 1.5; }
+  .svg-flow .flow-arrow { stroke: #94a3b8; stroke-width: 1.8; fill: none; marker-end: url(#flowarrow); }
+  .svg-flow .flow-label { font-size: 9px; fill: #1e293b; font-weight: 500; }
+  .svg-flow .flow-label-step { font-size: 10px; font-weight: 700; fill: #0f172a; }
+  .svg-flow .flow-label-desc { font-size: 8px; fill: #64748b; }
+  .svg-flow .flow-label-pk { font-size: 7px; fill: #059669; font-weight: 700; }
+  .svg-flow .flow-label-fk { font-size: 7px; fill: #7c3aed; font-weight: 700; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .page { padding: 10mm 8mm; }
+    .cover h1 { font-size: 32px; }
+    .card-grid { grid-template-columns: 1fr; }
+    table { font-size: 9px; }
+    thead th, tbody td { padding: 5px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn no-print" onclick="window.print()">
+  <svg viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zM8 5h8v3H8V5zm8 14H8v-4h8v4zm2-4v-2H6v2H4v-4c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v4h-2z"/></svg>
+  Guardar PDF
+</button>
+
+<!-- ==================== PORTADA ==================== -->
+<div class="page">
+  <div class="cover">
+    <div class="shield">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+    </div>
+    <h1>PRÁCTICAS 360</h1>
+    <h2>Documentación Técnica</h2>
+    <div class="line"></div>
+    <p class="subtitle">Sistema de Gestión de Prácticas Preprofesionales</p>
+    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Universidad Tecnológica UTE - LVT</p>
+    <div class="meta">
+      <div class="meta-item"><div class="meta-label">Versión</div><div class="meta-value">1.0.0</div></div>
+      <div class="meta-item"><div class="meta-label">Estado</div><div class="meta-value"><span class="badge badge-green">Producción</span></div></div>
+      <div class="meta-item"><div class="meta-label">Frontend</div><div class="meta-value">React 19</div></div>
+      <div class="meta-item"><div class="meta-label">Backend</div><div class="meta-value">Express 4</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ÍNDICE ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">i</span> Índice</h2>
+  <div class="sep"></div>
+  <div class="toc">
+    <div class="toc-item main"><span><span class="toc-num">1</span>Visión General</span><span class="toc-page">3</span></div>
+    <div class="toc-item main"><span><span class="toc-num">2</span>Arquitectura del Sistema</span><span class="toc-page">4</span></div>
+    <div class="toc-item main"><span><span class="toc-num">3</span>Frontend</span><span class="toc-page">5</span></div>
+    <div class="toc-item sub"><span>3.1 Estructura de Archivos</span><span>5</span></div>
+    <div class="toc-item sub"><span>3.2 Arquitectura SPA</span><span>5</span></div>
+    <div class="toc-item sub"><span>3.3 Pantallas y Navegación</span><span>6</span></div>
+    <div class="toc-item sub"><span>3.4 Estilos y Diseño</span><span>7</span></div>
+    <div class="toc-item sub"><span>3.5 Funcionalidades Clave</span><span>7</span></div>
+    <div class="toc-item main"><span><span class="toc-num">4</span>Backend</span><span class="toc-page">8</span></div>
+    <div class="toc-item sub"><span>4.1 Estructura de Archivos</span><span>8</span></div>
+    <div class="toc-item sub"><span>4.2 API Endpoints</span><span>8</span></div>
+    <div class="toc-item sub"><span>4.3 Autenticación</span><span>9</span></div>
+    <div class="toc-item sub"><span>4.4 Integración con IA (Groq)</span><span>9</span></div>
+    <div class="toc-item main"><span><span class="toc-num">5</span>Base de Datos</span><span class="toc-page">10</span></div>
+    <div class="toc-item sub"><span>5.1 Modelo Prisma</span><span>10</span></div>
+    <div class="toc-item sub"><span>5.2 Tablas Supabase (Frontend)</span><span>11</span></div>
+    <div class="toc-item main"><span><span class="toc-num">6</span>Configuración del Entorno</span><span class="toc-page">12</span></div>
+    <div class="toc-item main"><span><span class="toc-num">7</span>Flujo de Datos</span><span class="toc-page">13</span></div>
+    <div class="toc-item main"><span><span class="toc-num">8</span>Dependencias</span><span class="toc-page">15</span></div>
+    <div class="toc-item main"><span><span class="toc-num">9</span>Comandos de Desarrollo</span><span class="toc-page">16</span></div>
+    <div class="toc-item main"><span><span class="toc-num">10</span>Guía de Testeo</span><span class="toc-page">17</span></div>
+    <div class="toc-item main"><span><span class="toc-num">11</span>Recomendaciones Técnicas</span><span class="toc-page">19</span></div>
+  </div>
+</div>
+
+<!-- ==================== 1. VISIÓN GENERAL ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">1</span>Visión General</h2>
+  <div class="sep"></div>
+
+  <p><strong>Prácticas 360</strong> es una plataforma web integral para la gestión y seguimiento de prácticas preprofesionales de estudiantes universitarios. Su objetivo es centralizar el registro de actividades diarias, facilitar la supervisión docente y automatizar la generación de informes institucionales.</p>
+
+  <h3>Funcionalidades Principales</h3>
+  <ul>
+    <li><strong>Registro de actividades diarias:</strong> Los estudiantes registran fecha, horas, título y descripción técnica de cada actividad realizada.</li>
+    <li><strong>Asistente IA:</strong> Generación automática de descripciones técnicas profesionales mediante Groq.</li>
+    <li><strong>Supervisión docente:</strong> Los profesores pueden aprobar o rechazar informes con retroalimentación.</li>
+    <li><strong>Dashboard analítico:</strong> Visualización de horas aprobadas, distribución de estados y semáforo de riesgo por estudiante.</li>
+    <li><strong>Generación de informes Word:</strong> Exportación del informe institucional en formato .docx con plantilla oficial.</li>
+    <li><strong>Gestión de perfiles:</strong> Cada usuario mantiene su perfil con datos institucionales y de práctica.</li>
+  </ul>
+
+  <h3>Stack Tecnológico</h3>
+  <table>
+    <thead><tr><th>Capa</th><th>Tecnología</th><th>Versión</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Frontend</strong></td><td>React + Vite + Tailwind CSS</td><td>React 19 / Vite 8 / TW 4</td></tr>
+      <tr><td><strong>Backend</strong></td><td>Node.js + Express + TypeScript</td><td>Express 4 / TS 5</td></tr>
+      <tr><td><strong>Base de datos</strong></td><td>PostgreSQL (Supabase)</td><td>—</td></tr>
+      <tr><td><strong>ORM</strong></td><td>Prisma</td><td>5.22</td></tr>
+      <tr><td><strong>Autenticación</strong></td><td>Supabase Auth + JWT</td><td>—</td></tr>
+      <tr><td><strong>IA</strong></td><td>Groq (API compatible OpenAI)</td><td>llama-3.3-70b</td></tr>
+      <tr><td><strong>Gráficos</strong></td><td>Recharts</td><td>3.8</td></tr>
+      <tr><td><strong>Documentos</strong></td><td>docxtemplater + PizZip</td><td>3.69</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 2. ARQUITECTURA ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">2</span>Arquitectura del Sistema</h2>
+  <div class="sep"></div>
+
+  <p>El sistema sigue una arquitectura <strong>cliente-servidor</strong> con un frontend SPA en React que se comunica tanto directamente con Supabase (CRUD de informes) como con un backend Express (autenticación JWT e IA).</p>
+
+  <h3>Diagrama de Arquitectura</h3>
+
+  <svg class="svg-diagram" viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker>
+      <marker id="arrowdashed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker>
+      <filter id="shadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.06"/></filter>
+    </defs>
+
+    <!-- CLIENTE WEB outer box -->
+    <rect class="box-client" x="40" y="8" width="540" height="96" filter="url(#shadow)"/>
+    <text x="310" y="26" text-anchor="middle" class="label-title" fill="#64748b" font-size="11">CLIENTE WEB (NAVEGADOR)</text>
+    <circle cx="68" cy="24" r="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+    <path d="M64 24 l4-4 l4 4" stroke="#64748b" stroke-width="1.2" fill="none"/>
+
+    <rect class="box-frontend" x="58" y="34" width="504" height="62" filter="url(#shadow)"/>
+    <text x="310" y="52" text-anchor="middle" class="label-title" fill="#166534" font-size="12">Frontend React SPA</text>
+    <text x="310" y="66" text-anchor="middle" class="label-sub" font-size="9">Puerto 5173 · App.jsx · Vite Proxy · Tailwind CSS 4</text>
+    <text x="310" y="80" text-anchor="middle" class="label-tech" font-size="8">Supabase SDK (CRUD directo) · Proxy /api → http://localhost:5000</text>
+    <circle cx="78" cy="68" r="8" fill="none" stroke="#007A33" stroke-width="1.2"/>
+    <ellipse cx="78" cy="68" rx="11" ry="5" fill="none" stroke="#007A33" stroke-width="0.8" transform="rotate(0 78 68)"/>
+    <ellipse cx="78" cy="68" rx="11" ry="5" fill="none" stroke="#007A33" stroke-width="0.8" transform="rotate(60 78 68)"/>
+    <ellipse cx="78" cy="68" rx="11" ry="5" fill="none" stroke="#007A33" stroke-width="0.8" transform="rotate(120 78 68)"/>
+
+    <!-- Arrows down from frontend -->
+    <line class="arrow-line" x1="210" y1="110" x2="210" y2="150"/>
+    <line class="arrow-dashed" x1="410" y1="110" x2="410" y2="150"/>
+    <rect x="90" y="124" width="100" height="16" rx="3" fill="white" stroke="#dbeafe" stroke-width="1"/>
+    <text x="140" y="135" text-anchor="middle" class="label-tech" fill="#2563eb" font-size="7">HTTP /api/* (Proxy Vite)</text>
+    <rect x="330" y="124" width="100" height="16" rx="3" fill="white" stroke="#f3e8ff" stroke-width="1"/>
+    <text x="380" y="135" text-anchor="middle" class="label-tech" fill="#7c3aed" font-size="7">SDK Supabase (directo)</text>
+
+    <!-- Backend Express -->
+    <rect class="box-backend" x="100" y="158" width="220" height="76" filter="url(#shadow)"/>
+    <text x="210" y="176" text-anchor="middle" class="label-title" fill="#1e40af" font-size="12">Backend Express</text>
+    <text x="210" y="190" text-anchor="middle" class="label-sub" font-size="9">Puerto 5000</text>
+    <text x="210" y="204" text-anchor="middle" class="label-tech" font-size="8">/api/auth/* · /api/ai/* · JWT · Prisma</text>
+    <text x="210" y="216" text-anchor="middle" class="label-tech" font-size="8">TypeScript · ts-node-dev</text>
+    <rect x="118" y="174" width="16" height="12" rx="2" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+    <line x1="122" y1="176" x2="122" y2="182" stroke="#2563eb" stroke-width="0.8"/>
+    <line x1="126" y1="176" x2="126" y2="182" stroke="#2563eb" stroke-width="0.8"/>
+    <line x1="130" y1="176" x2="130" y2="182" stroke="#2563eb" stroke-width="0.8"/>
+
+    <!-- Supabase DB -->
+    <rect class="box-db" x="360" y="158" width="220" height="76" filter="url(#shadow)"/>
+    <text x="470" y="176" text-anchor="middle" class="label-title" fill="#6b21a8" font-size="12">Supabase PostgreSQL</text>
+    <text x="470" y="190" text-anchor="middle" class="label-sub" font-size="9">Base de Datos + Auth</text>
+    <text x="470" y="204" text-anchor="middle" class="label-tech" font-size="8">daily_reports · profiles · student_data</text>
+    <text x="470" y="216" text-anchor="middle" class="label-tech" font-size="8">RLS Policies · JWT Auth</text>
+    <ellipse cx="378" cy="174" rx="10" ry="4" fill="none" stroke="#7c3aed" stroke-width="1.2"/>
+    <path d="M368 174 l0 16 c0 4.4 4.5 8 10 8 s10-3.6 10-8 l0-16" fill="none" stroke="#7c3aed" stroke-width="1.2"/>
+    <line x1="368" y1="182" x2="388" y2="182" stroke="#7c3aed" stroke-width="0.8"/>
+    <line x1="368" y1="190" x2="388" y2="190" stroke="#7c3aed" stroke-width="0.8"/>
+
+    <!-- Arrow backend → Groq -->
+    <line class="arrow-line" x1="210" y1="234" x2="210" y2="272"/>
+
+    <!-- Groq AI -->
+    <rect class="box-ai" x="80" y="280" width="260" height="76" filter="url(#shadow)"/>
+    <text x="210" y="298" text-anchor="middle" class="label-title" fill="#92400e" font-size="12">Groq AI (API externa)</text>
+    <text x="210" y="312" text-anchor="middle" class="label-sub" font-size="9">Modelo llama-3.3-70b-versatile</text>
+    <text x="210" y="326" text-anchor="middle" class="label-tech" font-size="8">Temperatura 0.7 · Max Tokens 300 · SDK OpenAI</text>
+    <text x="210" y="340" text-anchor="middle" class="label-tech" font-size="8">GROQ_API_KEY → Prompt → Descripción técnica</text>
+    <circle cx="100" cy="296" r="10" fill="none" stroke="#d97706" stroke-width="1.2"/>
+    <path d="M94 296 c0-5 3-9 6-9 s6 4 6 9 c0 5-3 9-6 9 s-6-4-6-9z" fill="none" stroke="#d97706" stroke-width="1"/>
+    <path d="M91 296 a11 11 0 0 1 18 0" fill="none" stroke="#d97706" stroke-width="0.8" stroke-dasharray="2,1"/>
+
+    <!-- Legend -->
+    <g transform="translate(220, 364)">
+      <rect x="0" y="0" width="10" height="8" rx="2" fill="#dcfce7" stroke="#007A33" stroke-width="0.8"/>
+      <text x="14" y="7" class="label-tech" font-size="8">Frontend</text>
+      <rect x="70" y="0" width="10" height="8" rx="2" fill="#dbeafe" stroke="#2563eb" stroke-width="0.8"/>
+      <text x="84" y="7" class="label-tech" font-size="8">Backend</text>
+      <rect x="140" y="0" width="10" height="8" rx="2" fill="#f3e8ff" stroke="#7c3aed" stroke-width="0.8"/>
+      <text x="154" y="7" class="label-tech" font-size="8">DB</text>
+      <rect x="190" y="0" width="10" height="8" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="0.8"/>
+      <text x="204" y="7" class="label-tech" font-size="8">IA</text>
+    </g>
+  </svg>
+
+  <h3>Flujo de Comunicación</h3>
+  <ol>
+    <li><strong>Frontend → Supabase:</strong> Operaciones CRUD de informes diarios, perfiles y autenticación mediante SDK de Supabase.</li>
+    <li><strong>Frontend → Backend (proxy):</strong> Peticiones a <code>/api/*</code> redirigidas por Vite al backend Express.</li>
+    <li><strong>Backend → Supabase:</strong> Consultas a base de datos mediante Prisma ORM para autenticación.</li>
+    <li><strong>Backend → Groq:</strong> Peticiones a la API de Groq para generación de descripciones con IA.</li>
+  </ol>
+</div>
+
+<!-- ==================== 3. FRONTEND ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">3</span>Frontend</h2>
+  <div class="sep"></div>
+
+  <h3>3.1 Estructura de Archivos</h3>
+  <div class="flow">
+FrontEnd/
+ ├── index.html                # Entry point HTML
+ ├── vite.config.js            # Configuración Vite + proxy a backend
+ ├── package.json              # Dependencias y scripts
+ ├── postcss.config.js         # PostCSS con Tailwind
+ ├── tailwind.config.js        # Configuración Tailwind
+ ├── public/
+ │   ├── favicon.svg
+ │   └── plantilla_institucional.docx   # Plantilla Word
+ └── src/
+     ├── main.jsx              # Punto de entrada React
+     ├── App.jsx               # Componente único (~1400 líneas)
+     ├── supabase.js           # Cliente Supabase
+     ├── index.css             # Estilos globales + Tailwind
+     └── assets/               # Recursos estáticos</div>
+
+  <h3>3.2 Arquitectura SPA Monolítica</h3>
+  <p>La aplicación es una <strong>Single Page Application</strong> sin enrutador. Todo el estado y la UI se manejan en un único componente <code>App.jsx</code> (~1400 líneas). Las vistas se alternan mediante variables de estado:</p>
+  <ul>
+    <li><code>vistaAlumno</code>: <span class="badge badge-blue">'informes'</span> | <span class="badge badge-blue">'perfil'</span></li>
+    <li><code>vistaProfesor</code>: <span class="badge badge-blue">'alumnos'</span> | <span class="badge badge-blue">'dashboard'</span> | <span class="badge badge-blue">'perfil'</span></li>
+  </ul>
+
+  <h3 class="sub">Estados Principales del Componente</h3>
+  <table>
+    <thead><tr><th>Estado</th><th>Tipo</th><th>Propósito</th><th>Valores</th></tr></thead>
+    <tbody>
+      <tr><td><code>isLoggedIn</code></td><td>boolean</td><td>Control de sesión activa</td><td>true / false</td></tr>
+      <tr><td><code>userLogged</code></td><td>object</td><td>Datos del usuario autenticado</td><td>{ id, nombre, rol, ... }</td></tr>
+      <tr><td><code>informesGuardados</code></td><td>array</td><td>Informes del estudiante logueado</td><td>[{ id, fecha, horas, ... }]</td></tr>
+      <tr><td><code>analyticsData</code></td><td>object</td><td>Datos del dashboard del profesor</td><td>{ studentsHoursArray, ... }</td></tr>
+      <tr><td><code>cargandoIA</code></td><td>boolean</td><td>Feedback visual durante petición IA</td><td>true / false</td></tr>
+      <tr><td><code>cursoDesbloqueado</code></td><td>boolean</td><td>Acceso del profesor al curso</td><td>true / false</td></tr>
+      <tr><td><code>mensajeGlobal</code></td><td>object</td><td>Notificación flotante</td><td>{ texto, tipo }</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 3.3 PANTALLAS ==================== -->
+<div class="page">
+  <h3>3.3 Pantallas y Flujo de Navegación</h3>
+
+  <h3 class="sub">Login / Registro</h3>
+  <div class="card">
+    <div class="card-grid">
+      <div class="card-item">
+        <div class="card-label">Inicio de Sesión</div>
+        <div class="card-value">Email + Contraseña</div>
+        <div class="card-desc">Autenticación mediante Supabase Auth con JWT</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Registro Alumno</div>
+        <div class="card-value">Nombre, Facultad, Carrera, Ciclo, Paralelo</div>
+        <div class="card-desc">Datos académicos completos para perfil</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Registro Profesor</div>
+        <div class="card-value">Nombre Completo</div>
+        <div class="card-desc">Registro simplificado para docentes</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Roles</div>
+        <div class="card-value"><span class="badge badge-green">ALUMNO</span> <span class="badge badge-amber">PROFESOR</span></div>
+        <div class="card-desc">Cada rol tiene vistas y permisos diferentes</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">Vista Alumno (rol = ALUMNO)</h3>
+  <table>
+    <thead><tr><th>Sección</th><th>Componentes</th><th>Acciones</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Nueva Actividad</strong></td>
+        <td>Formulario con fecha, horas (1-8), título, descripción (10 filas), observaciones + botón IA</td>
+        <td>Guardar / Cancelar edición / ✨ Mejorar con IA</td>
+      </tr>
+      <tr>
+        <td><strong>Bitácora</strong></td>
+        <td>Tabla con informes: fecha, horas, actividad, descripción, estado</td>
+        <td>Editar (solo Rechazados) / Eliminar</td>
+      </tr>
+      <tr>
+        <td><strong>Barra de Progreso</strong></td>
+        <td>Indicador visual horas acumuladas vs. meta de <strong>120 horas</strong></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Generar Word</strong></td>
+        <td>Botón de descarga de informe institucional</td>
+        <td>Descargar .docx</td>
+      </tr>
+      <tr>
+        <td><strong>Perfil</strong></td>
+        <td>Formulario: nombre, cédula, empresa, área, tutor empresarial</td>
+        <td>Guardar cambios</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Vista Profesor (rol = PROFESOR)</h3>
+  <table>
+    <thead><tr><th>Sección</th><th>Componentes</th><th>Acciones</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Seleccionar Curso</strong></td>
+        <td>Facultad y carrera precargadas desde <code>profiles.faculty</code> + <code>profiles.career</code>. Selectores de ciclo y paralelo + botón "Cargar"</td>
+        <td>Cargar alumnos del curso</td>
+      </tr>
+      <tr>
+        <td><strong>Lista de Alumnos</strong></td>
+        <td>Lista filtrada del curso. Muestra nombre, empresa y área</td>
+        <td>Seleccionar estudiante</td>
+      </tr>
+      <tr>
+        <td><strong>Informes</strong></td>
+        <td>Bitácora del estudiante seleccionado</td>
+        <td>Aprobar / Rechazar (con motivo obligatorio)</td>
+      </tr>
+      <tr>
+        <td><strong>Dashboard</strong></td>
+        <td>Gráficos Recharts + tarjetas de riesgo</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Mi Perfil</strong></td>
+        <td>Formulario de nombre y correo</td>
+        <td>Actualizar datos institucionales</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 3.4 - 3.5 ==================== -->
+<div class="page">
+  <h3>3.4 Estilos y Diseño</h3>
+
+  <div class="card">
+    <div class="card-grid">
+      <div class="card-item"><div class="card-label">Framework CSS</div><div class="card-value">Tailwind CSS 4</div><div class="card-desc">Utility-first con PostCSS</div></div>
+      <div class="card-item"><div class="card-label">Tipografía</div><div class="card-value">Plus Jakarta Sans</div><div class="card-desc">Google Fonts, 400-800 weight</div></div>
+      <div class="card-item"><div class="card-label">Color Primario</div><div class="card-value" style="color:#007A33;">#007A33</div><div class="card-desc">Verde institucional, botones, barras</div></div>
+      <div class="card-item"><div class="card-label">Color Acento</div><div class="card-value" style="color:#E60000;">#E60000</div><div class="card-desc">Rojo UTE-LVT, cerrar sesión</div></div>
+      <div class="card-item"><div class="card-label">Animaciones</div><div class="card-value">Grid tecnológico + Pulso + Flotación</div><div class="card-desc">Keyframes inyectados via JS</div></div>
+      <div class="card-item"><div class="card-label">Glassmorphism</div><div class="card-value">backdrop-filter blur(12px)</div><div class="card-desc">Notificaciones flotantes</div></div>
+    </div>
+  </div>
+
+  <h3>3.5 Funcionalidades Clave</h3>
+
+  <h3 class="sub">✨ Mejorar con IA (Groq)</h3>
+  <p>Botón ubicado dentro del textarea de descripción, en la esquina inferior derecha. El flujo asíncrono sigue un patrón Request/Response controlado por el estado <code>cargandoIA</code> (booleano React). Al hacer clic:</p>
+  <ol>
+    <li>Validación previa: si <code>tituloActividad.trim() === ''</code>, el botón permanece deshabilitado (<code>disabled={cargandoIA || !tituloActividad.trim()}</code>).</li>
+    <li><code>setCargandoIA(true)</code> bloquea la interfaz: el botón muestra "Mejorando...", se deshabilita el textarea y se previenen condiciones de carrera (<em>Race Conditions</em>) al impedir un segundo clic mientras la petición esté en curso.</li>
+    <li>Envía <code>POST /api/ai/enhance-description</code> con payload estructurado <code>{ title: tituloActividad, currentDescription: descripcionActividad }</code> mediante <code>fetch()</code> asíncrono.</li>
+    <li>El backend construye un prompt profesional y consulta Groq (modelo <code>llama-3.3-70b-versatile</code>).</li>
+    <li>La respuesta reemplaza automáticamente el contenido del textarea mediante <code>setDescripcionActividad(data.description)</code>.</li>
+    <li>Finalmente <code>setCargandoIA(false)</code> restaura la interactividad del formulario.</li>
+  </ol>
+  <p>Este mecanismo de <em>latch</em> booleano (true/false) sobre <code>cargandoIA</code> mitiga condiciones de carrera: cualquier petición previa que aún no haya resuelto queda huérfana (el estado <code>loading</code> impide su procesamiento) y el usuario recibe siempre la descripción de la última llamada exitosa.</p>
+
+  <h3 class="sub">📄 Generación de Informe Word</h3>
+  <p>Usa <strong>docxtemplater</strong> + <strong>PizZip</strong> + <strong>file-saver</strong>. La plantilla oficial debe estar en <code>public/plantilla_institucional.docx</code>. El flujo a bajo nivel opera así:</p>
+  <ol>
+    <li><strong>Descompresión:</strong> <code>fetch('/plantilla_institucional.docx')</code> obtiene el binario como <code>ArrayBuffer</code>. <code>new PizZip(arrayBuffer)</code> descomprime el formato OPC (Open Packaging Convention) del <code>.docx</code> en memoria, exponiendo el árbol XML de partes (document.xml, styles.xml, etc.).</li>
+    <li><strong>Parseo XML:</strong> <code>new Docxtemplater(zip)</code> recorre el DOM de <code>document.xml</code> buscando tokens estructurales como <code>{FACULTAD}</code>, <code>{CARRERA}</code>, <code>{NOMBRE_ESTUDIANTE}</code> y directivas de bucle <code>{#informes}</code>...<code>{/informes}</code> que delimitan bloques repetitivos.</li>
+    <li><strong>Inyección de datos:</strong> <code>doc.render()</code> recibe un objeto JSON con la carga útil estructurada. Para el bucle <code>{#informes}</code>, mapea el arreglo <code>informesAprobados.map(i => ({ id, fecha, horas, actividad_completa }))</code> y Docxtemplater replica el bloque XML interno por cada elemento del arreglo.</li>
+    <li><strong>Empaquetado:</strong> <code>doc.getZip().generate({ type: 'blob' })</code> re-comprime el ZIP en memoria con el XML modificado y <code>saveAs(blob, 'Informe_Final_Practicas_...docx')</code> (FileSaver) dispara la descarga asíncrona al navegador.</li>
+  </ol>
+
+  <h3 class="sub">📊 Dashboard del Profesor</h3>
+  <p>Utiliza <strong>Recharts</strong> con componentes declarativos que procesan la matriz de datos reactivos para renderizar vectores de rendimiento estudiantil sin sobrecargar el hilo principal:</p>
+  <ul>
+    <li><strong>&lt;ResponsiveContainer&gt;:</strong> Componente contenedor que ajusta automáticamente las dimensiones del gráfico al ancho del panel contenedor mediante observación de <code>ResizeObserver</code>, evitando deformaciones en ventanas redimensionadas.</li>
+    <li><strong>&lt;BarChart&gt;:</strong> Renderiza las horas aprobadas por estudiante en orden descendente. Los datos se procesan con <code>analyticsData.studentsHoursArray</code> donde cada entrada contiene <code>{ name, horasAprobadas }</code>. Recharts calcula la escala del eje Y automáticamente desde el dominio de los datos.</li>
+    <li><strong>&lt;PieChart&gt;:</strong> Distribución de estados: <span class="badge badge-green">Aprobados</span> <span class="badge badge-red">Rechazados</span> <span class="badge badge-amber">Pendientes</span>. Recharts calcula los ángulos proporcionales mediante la relación <code>ángulo = (valor / total) * 360°</code> y aplica interpolación SVG para las transiciones de entrada.</li>
+    <li><strong>Semáforo de riesgo:</strong> Determinado matemáticamente según la densidad de registros acumulados del estudiante: <em>Peligro Crítico</em> (Rojo) si <code>registros &lt; 4</code>, <em>Riesgo Moderado</em> (Amarillo) si <code>4 &le; registros &le; 6</code>, <em>Bajo Riesgo</em> (Verde) si <code>registros &gt; 6</code>. Cada tarjeta ejecuta <code>analyticsData.studentRecords[studentId]</code> para contar el total de informes del estudiante.</li>
+    <li><strong>Sanitización de horas:</strong> En el cómputo de horas acumuladas se aplica <code>parseInt(horas, 10) || 0</code> para neutralizar valores inyectados vacíos, strings huérfanos o ataques que generen <code>NaN</code>. Este patrón convierte cualquier valor no numérico a <code>0</code>, garantizando que la base de datos reciba un entero válido y evitando corrupción en las agregaciones del dashboard.</li>
+  </ul>
+</div>
+
+<!-- ==================== 4. BACKEND ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">4</span>Backend</h2>
+  <div class="sep"></div>
+
+  <h3>4.1 Estructura de Archivos</h3>
+  <div class="flow">
+BackEnd/
+ ├── package.json
+ ├── tsconfig.json
+ ├── .env                        # PORT, DATABASE_URL, JWT_SECRET, GROQ_API_KEY
+ ├── prisma/
+ │   └── schema.prisma           # Modelo de datos (User, StudentProfile, DailyReport)
+ └── src/
+     ├── app.ts                  # Servidor Express (puerto 5000)
+     ├── db.ts                   # Cliente Prisma singleton
+     ├── controllers/
+     │   ├── auth.controller.ts  # register() + login()
+     │   └── ai.controller.ts    # enhanceDescription() → Groq
+     ├── routes/
+     │   ├── auth.routes.ts      # /register, /login, /perfil-privado
+     │   └── ai.routes.ts        # /enhance-description
+     └── middlewares/
+         └── auth.middleware.ts   # authenticateToken (JWT verification)</div>
+
+  <h3>4.2 API Endpoints</h3>
+  <table>
+    <thead><tr><th>Método</th><th>Ruta</th><th>Auth</th><th>Request Body</th><th>Response</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-green">GET</span></td>
+        <td><code>/health</code></td>
+        <td>❌</td>
+        <td>—</td>
+        <td><code>{ status: "ok" }</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-amber">POST</span></td>
+        <td><code>/api/auth/register</code></td>
+        <td>❌</td>
+        <td><code>{ email, password, role, fullName, faculty, ... }</code></td>
+        <td><code>{ message, user }</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-amber">POST</span></td>
+        <td><code>/api/auth/login</code></td>
+        <td>❌</td>
+        <td><code>{ email, password }</code></td>
+        <td><code>{ token, user }</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">GET</span></td>
+        <td><code>/api/auth/perfil-privado</code></td>
+        <td>✅ JWT</td>
+        <td>Header: <code>Authorization: Bearer &lt;token&gt;</code></td>
+        <td><code>{ message, userLogged }</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-amber">POST</span></td>
+        <td><code>/api/ai/enhance-description</code></td>
+        <td>❌</td>
+        <td><code>{ title, currentDescription }</code></td>
+        <td><code>{ description }</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 4.3 - 4.4 ==================== -->
+<div class="page">
+  <h3>4.3 Autenticación</h3>
+  <p>El sistema implementa un <strong>doble sistema de autenticación</strong> que combina Supabase Auth para el frontend y JWT propio para el backend.</p>
+
+  <h3 class="sub">Flujo de Inicio de Sesión</h3>
+  <div class="flow">
+1. Frontend: supabase.auth.signInWithPassword({ email, password })
+2. Frontend: consulta tabla 'profiles' WHERE id = authData.user.id
+3. ¿Rol = ALUMNO?
+   ├── Sí → Consulta 'student_data' WHERE profile_id = profile.id
+   │         Almacena en userLogged: { id, student_id, nombre, facultad,
+   │         carrera, ciclo, empresa, area, tutorEmpresarial }
+   │         fetchReportsForStudent(student.id)
+   └── No → Almacena en userLogged: { id, nombre, email, rol: 'PROFESOR' }
+4. setIsLoggedIn(true) → Renderiza vista según rol</div>
+
+  <h3 class="sub">Middleware JWT</h3>
+  <ul>
+    <li><strong>Extracción:</strong> Lee header <code>Authorization: Bearer &lt;token&gt;</code></li>
+    <li><strong>Verificación:</strong> <code>jwt.verify(token, JWT_SECRET)</code> — payload: <code>{ id, role }</code></li>
+    <li><strong>Inyección:</strong> <code>req.user = { id, role }</code> disponible en controladores</li>
+    <li><strong>Expiración:</strong> Token configurado con <code>expiresIn: '8h'</code></li>
+    <li><strong>Errores:</strong> Sin token → 401, Token inválido/expirado → 403</li>
+  </ul>
+
+  <h3>4.4 Integración con IA (Groq)</h3>
+
+  <div class="card">
+    <div class="card-item" style="margin-bottom: 8px;">
+      <div class="card-label">Endpoint</div>
+      <div class="card-value"><code>POST /api/ai/enhance-description</code></div>
+    </div>
+    <div class="card-grid">
+      <div class="card-item"><div class="card-label">SDK</div><div class="card-value">OpenAI</div><div class="card-desc">Compatible con API de Groq</div></div>
+      <div class="card-item"><div class="card-label">Base URL</div><div class="card-value">api.groq.com/openai/v1</div><div class="card-desc">Endpoint de Groq</div></div>
+      <div class="card-item"><div class="card-label">Modelo</div><div class="card-value">llama-3.3-70b-versatile</div><div class="card-desc">Alta calidad, bajo costo</div></div>
+      <div class="card-item"><div class="card-label">Temperatura</div><div class="card-value">0.7</div><div class="card-desc">Balance creatividad-precisión</div></div>
+      <div class="card-item"><div class="card-label">Max Tokens</div><div class="card-value">300</div><div class="card-desc">Suficiente para 2-4 oraciones</div></div>
+      <div class="card-item"><div class="card-label">API Key</div><div class="card-value"><code>GROQ_API_KEY</code></div><div class="card-desc">Variable de entorno</div></div>
+    </div>
+  </div>
+
+  <h3 class="sub">Flujo Asíncrono Request / Response</h3>
+  <p>La comunicación entre el frontend y Groq sigue un patrón request/response mediado por el backend Express. El frontend envía un payload JSON estructurado con <code>{ title: string, currentDescription: string }</code> mediante <code>POST /api/ai/enhance-description</code>. El backend valida que <code>title</code> no esté vacío (responde 400 en caso contrario), construye el prompt del sistema con las variables inyectadas, y ejecuta <code>openai.chat.completions.create()</code> contra la API de Groq. La respuesta viaja de vuelta como <code>{ description: string }</code>.</p>
+  <p>Para mitigar condiciones de carrera (<em>Race Conditions</em>) durante peticiones concurrentes, el frontend gestiona el estado booleano <code>cargandoIA</code>. Antes de disparar el <code>fetch()</code>, se ejecuta <code>setCargandoIA(true)</code>, lo que deshabilita el botón de activación (<code>disabled={cargandoIA}</code>) y bloquea el textarea de descripción mediante <code>readOnly={cargandoIA}</code>. Cualquier clic adicional durante la carga es ignorado. Al resolverse la promesa (éxito o error), se ejecuta <code>setCargandoIA(false)</code> restaurando la interactividad. Este latch impide que una segunda petición sobreescriba la respuesta de una anterior, garantizando que solo la última llamada exitosa actualice el estado del formulario.</p>
+
+  <h3 class="sub">Prompt del Sistema</h3>
+  <div class="flow">
+Eres un asistente que ayuda a estudiantes de prácticas preprofesionales
+a redactar descripciones técnicas de sus actividades.
+
+Título: "{title}"
+Descripción actual: "{currentDescription}"
+
+Genera una descripción técnica profesional y detallada que sea:
+- Formal y técnica
+- Explique qué se hizo y con qué propósito
+- 2 a 4 oraciones
+- En español
+
+Responde SOLO con la descripción.</div>
+</div>
+
+<!-- ==================== 5. BD ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">5</span>Base de Datos</h2>
+  <div class="sep"></div>
+
+  <h3>5.1 Modelo Prisma (Backend)</h3>
+
+  <h3 class="sub">Enumeraciones</h3>
+  <div class="flow" style="font-size: 11px;">
+enum Role { ALUMNO, PROFESOR, SUPERVISOR }
+enum ApprovalStatus { PENDIENTE, APROBADO, RECHAZADO }</div>
+
+  <h3 class="sub">Tabla: users</h3>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>PK, NOT NULL</td><td>Identificador único (UUID v4)</td></tr>
+      <tr><td>email</td><td>varchar(255)</td><td>UNIQUE, NOT NULL</td><td>Correo electrónico del usuario</td></tr>
+      <tr><td>passwordHash</td><td>varchar(255)</td><td>NOT NULL</td><td>Hash bcrypt de 60 caracteres</td></tr>
+      <tr><td>role</td><td>varchar(20)</td><td>NOT NULL, CHECK(role IN ('ALUMNO','PROFESOR','SUPERVISOR'))</td><td>Rol del usuario en el sistema</td></tr>
+      <tr><td>createdAt</td><td>timestamp with time zone</td><td>NOT NULL, DEFAULT NOW()</td><td>Marca temporal de registro</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Tabla: student_profiles</h3>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>PK, NOT NULL</td><td>Identificador único (UUID v4)</td></tr>
+      <tr><td>userId</td><td>uuid</td><td>FK → users(id), NOT NULL, UNIQUE</td><td>Relación 1:1 con la tabla users</td></tr>
+      <tr><td>fullName</td><td>varchar(255)</td><td>NOT NULL</td><td>Nombre completo del estudiante</td></tr>
+      <tr><td>nationalId</td><td>varchar(20)</td><td>UNIQUE, NOT NULL</td><td>Cédula de identidad nacional</td></tr>
+      <tr><td>faculty</td><td>varchar(255)</td><td>NOT NULL</td><td>Facultad universitaria</td></tr>
+      <tr><td>career</td><td>varchar(255)</td><td>NOT NULL</td><td>Carrera universitaria</td></tr>
+      <tr><td>cycle</td><td>varchar(20)</td><td>NOT NULL</td><td>Ciclo académico (ej. 8vo)</td></tr>
+      <tr><td>parallel</td><td>varchar(10)</td><td>NOT NULL</td><td>Paralelo asignado (ej. A)</td></tr>
+      <tr><td>companyName</td><td>varchar(255)</td><td>NOT NULL</td><td>Empresa donde realiza las prácticas</td></tr>
+      <tr><td>technicalArea</td><td>varchar(255)</td><td>NOT NULL</td><td>Área técnica asignada</td></tr>
+      <tr><td>academicTutorId</td><td>uuid</td><td>FK → users(id), NULLABLE</td><td>Tutor académico (opcional)</td></tr>
+      <tr><td>companySupervisorName</td><td>varchar(255)</td><td>NULLABLE</td><td>Tutor empresarial (opcional)</td></tr>
+      <tr><td>companySupervisorPosition</td><td>varchar(255)</td><td>NULLABLE</td><td>Cargo del tutor empresarial</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Índices compuestos:</strong> <code>@@index([faculty, career, cycle, parallel])</code> — optimiza búsquedas por curso.</p>
+</div>
+
+<div class="page">
+  <h3 class="sub">Tabla: daily_reports</h3>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>PK, NOT NULL</td><td>Identificador único (UUID v4)</td></tr>
+      <tr><td>studentProfileId</td><td>uuid</td><td>FK → student_profiles(id), NOT NULL</td><td>Estudiante que reporta la actividad</td></tr>
+      <tr><td>reportDate</td><td>date</td><td>NOT NULL</td><td>Fecha del reporte (sin hora)</td></tr>
+      <tr><td>executedHours</td><td>numeric(5,2)</td><td>NOT NULL, CHECK(executedHours >= 0)</td><td>Horas ejecutadas (precisión 2 decimales)</td></tr>
+      <tr><td>technicalDescription</td><td>varchar(255)</td><td>NOT NULL</td><td>Título de la actividad realizada</td></tr>
+      <tr><td>operationalNotes</td><td>text</td><td>NULLABLE</td><td>Descripción técnica + observaciones del alumno</td></tr>
+      <tr><td>approvalStatus</td><td>varchar(20)</td><td>NOT NULL, DEFAULT 'PENDIENTE', CHECK(approvalStatus IN ('PENDIENTE','APROBADO','RECHAZADO'))</td><td>Estado de aprobación del reporte</td></tr>
+      <tr><td>feedback</td><td>text</td><td>NULLABLE</td><td>Retroalimentación del profesor (obligatorio si RECHAZADO)</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Restricciones:</strong></p>
+  <ul>
+    <li><code>@@unique([studentProfileId, reportDate])</code> — Un reporte por día por estudiante</li>
+    <li><code>@@index([approvementStatus])</code> — Índice para filtrado por estado</li>
+  </ul>
+
+  <h3>5.2 Tablas Supabase (Frontend - acceso directo)</h3>
+  <p>Adicionalmente, el frontend accede directamente a las siguientes tablas creadas manualmente en la consola de Supabase. Estas tablas <strong>no están gestionadas por Prisma</strong>:</p>
+
+  <table>
+    <thead><tr><th>Tabla</th><th>Columnas</th><th>Propósito</th></tr></thead>
+    <tbody>
+      <tr><td><code>profiles</code></td><td>id (uuid PK), role (varchar), full_name (varchar), email (varchar UNIQUE)</td><td>Perfiles de usuario sincronizados con auth</td></tr>
+      <tr><td><code>student_data</code></td><td>profile_id (uuid PK FK → profiles.id), faculty (varchar), career (varchar), cycle (varchar), parallel (varchar), company_name (varchar), technical_area (varchar), cedula (varchar), supervisor_name (varchar)</td><td>Datos extendidos del estudiante</td></tr>
+      <tr><td><code>course_passwords</code></td><td>id (uuid PK), password (varchar NOT NULL), faculty (varchar NOT NULL), career (varchar NOT NULL), cycle (varchar NOT NULL), parallel (varchar NOT NULL)</td><td>Contraseñas por curso para acceso docente</td></tr>
+      <tr><td><code>teacher_keys</code></td><td>id (uuid PK), key (varchar UNIQUE NOT NULL), description (text), used (boolean DEFAULT FALSE)</td><td>Claves de un solo uso para registro de docentes</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">Detalle de columnas — profiles</h4>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo (PostgreSQL)</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>PK, NOT NULL</td><td>Identificador UUID (sincronizado con auth.users.id)</td></tr>
+      <tr><td>role</td><td>varchar(20)</td><td>NOT NULL</td><td>Rol del usuario: ALUMNO | PROFESOR</td></tr>
+      <tr><td>full_name</td><td>varchar(255)</td><td>NOT NULL</td><td>Nombre completo del usuario</td></tr>
+      <tr><td>email</td><td>varchar(255)</td><td>UNIQUE, NOT NULL</td><td>Correo electrónico institucional</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">Detalle de columnas — student_data</h4>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo (PostgreSQL)</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>profile_id</td><td>uuid</td><td>PK, FK → profiles(id), NOT NULL</td><td>Relación 1:1 con profiles (hereda id)</td></tr>
+      <tr><td>faculty</td><td>varchar(255)</td><td>NOT NULL</td><td>Facultad del estudiante</td></tr>
+      <tr><td>career</td><td>varchar(255)</td><td>NOT NULL</td><td>Carrera universitaria</td></tr>
+      <tr><td>cycle</td><td>varchar(20)</td><td>NOT NULL</td><td>Ciclo académico actual</td></tr>
+      <tr><td>parallel</td><td>varchar(10)</td><td>NOT NULL</td><td>Paralelo asignado</td></tr>
+      <tr><td>company_name</td><td>varchar(255)</td><td>NULLABLE</td><td>Nombre de la empresa de prácticas</td></tr>
+      <tr><td>technical_area</td><td>varchar(255)</td><td>NULLABLE</td><td>Área técnica de desempeño</td></tr>
+      <tr><td>cedula</td><td>varchar(20)</td><td>NULLABLE</td><td>Cédula de identidad del estudiante</td></tr>
+      <tr><td>supervisor_name</td><td>varchar(255)</td><td>NULLABLE</td><td>Nombre del supervisor empresarial</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">Detalle de columnas — course_passwords</h4>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo (PostgreSQL)</th><th>Restricción</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>uuid</td><td>PK, NOT NULL</td><td>Identificador único generado con gen_random_uuid()</td></tr>
+      <tr><td>password</td><td>varchar(255)</td><td>NOT NULL</td><td>Contraseña de acceso docente al curso</td></tr>
+      <tr><td>faculty</td><td>varchar(255)</td><td>NOT NULL</td><td>Facultad asociada al curso</td></tr>
+      <tr><td>career</td><td>varchar(255)</td><td>NOT NULL</td><td>Carrera asociada al curso</td></tr>
+      <tr><td>cycle</td><td>varchar(20)</td><td>NOT NULL</td><td>Ciclo académico del curso</td></tr>
+      <tr><td>parallel</td><td>varchar(10)</td><td>NOT NULL</td><td>Paralelo del curso</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note warn">⚠ <strong>Inconsistencia de esquemas:</strong> El backend (Prisma) usa nombres en <strong>camelCase</strong> (<code>student_profiles</code>, <code>daily_reports</code>), mientras que el frontend accede a tablas en <strong>snake_case</strong> (<code>profiles</code>, <code>student_data</code>). Se recomienda unificar todo el CRUD a través del backend para evitar duplicidad y mantener consistencia.</div>
+</div>
+
+<!-- ==================== 6. CONFIG ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">6</span>Configuración del Entorno</h2>
+  <div class="sep"></div>
+
+  <h3>Variables de Entorno</h3>
+  <p>Archivo <code>BackEnd/.env</code>:</p>
+  <div class="flow">
+PORT=5000
+DATABASE_URL="postgresql://usuario:contraseña@host:5432/postgres?sslmode=require"
+JWT_SECRET=clave_secreta_para_firmar_tokens
+GROQ_API_KEY=gsk_tu_api_key_aqui</div>
+
+  <h3>Proxy de Desarrollo (Vite)</h3>
+  <p>Archivo <code>FrontEnd/vite.config.js</code> — redirige peticiones <code>/api/*</code> al backend:</p>
+  <div class="flow">
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
+})</div>
+
+  <h3>Mapa de Servicios</h3>
+  <table>
+    <thead><tr><th>Servicio</th><th>URL / Puerto</th><th>Propósito</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend (desarrollo)</td><td><code>http://localhost:5173</code></td><td>Servidor Vite con HMR</td></tr>
+      <tr><td>Backend (desarrollo)</td><td><code>http://localhost:5000</code></td><td>Express + ts-node-dev</td></tr>
+      <tr><td>Supabase</td><td><code>https://*.supabase.co</code></td><td>Base de datos PostgreSQL + Auth</td></tr>
+      <tr><td>Groq API</td><td><code>https://api.groq.com/openai/v1</code></td><td>IA generativa (descripciones)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Requisitos del Sistema</h3>
+  <ul>
+    <li><strong>Node.js:</strong> v18+ (recomendado v22+)</li>
+    <li><strong>npm:</strong> v9+</li>
+    <li><strong>Cuenta Supabase:</strong> Proyecto activo con las tablas configuradas</li>
+    <li><strong>API Key Groq:</strong> Obtenida desde <a href="https://console.groq.com" style="color:#007A33;">console.groq.com</a></li>
+  </ul>
+</div>
+
+<!-- ==================== 7. FLUJO DE DATOS ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">7</span>Flujo de Datos</h2>
+  <div class="sep"></div>
+
+  <h3>7.1 Creación de Informe (Alumno)</h3>
+  <svg class="svg-flow" viewBox="0 0 660 440" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="flowarrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker>
+      <filter id="fshadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/></filter>
+    </defs>
+
+    <!-- Step 1 -->
+    <circle cx="36" cy="28" r="12" fill="#007A33"/>
+    <text x="36" y="33" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+    <rect class="flow-box" x="56" y="16" width="548" height="28" filter="url(#fshadow)"/>
+    <text x="66" y="34" class="flow-label-step" font-size="11">Usuario completa formulario</text>
+    <text x="594" y="34" text-anchor="end" class="flow-label-desc" font-size="10">fecha, horas, título, descripción, observaciones</text>
+    <line class="flow-arrow" x1="330" y1="44" x2="330" y2="70"/>
+
+    <!-- Step 2 - decision diamond -->
+    <circle cx="36" cy="82" r="12" fill="#007A33"/>
+    <text x="36" y="87" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+    <polygon class="flow-box-decision" points="330,70 420,95 330,120 240,95" filter="url(#fshadow)"/>
+    <text x="330" y="93" text-anchor="middle" class="flow-label" font-size="10" font-weight="600">¿idInformeEdicion ≠ null?</text>
+    <text x="330" y="105" text-anchor="middle" class="flow-label" font-size="9">(Modo Edición?)</text>
+
+    <!-- Yes → Edit -->
+    <line class="flow-arrow" x1="420" y1="95" x2="470" y2="95"/>
+    <line class="flow-arrow" x1="470" y1="95" x2="470" y2="148"/>
+    <rect class="flow-box-action" x="380" y="148" width="220" height="48" filter="url(#fshadow)"/>
+    <text x="490" y="166" text-anchor="middle" class="flow-label" fill="#166534" font-weight="700" font-size="10">UPDATE daily_reports</text>
+    <text x="490" y="180" text-anchor="middle" class="flow-label-desc" font-size="9">SET approval_status='PENDIENTE'</text>
+    <text x="490" y="192" text-anchor="middle" class="flow-label-desc" font-size="9">WHERE id = idInformeEdicion</text>
+    <text x="474" y="138" class="flow-label" fill="#059669" font-size="10" font-weight="600">Sí (Editar)</text>
+
+    <!-- No → New -->
+    <line class="flow-arrow" x1="240" y1="95" x2="130" y2="95"/>
+    <line class="flow-arrow" x1="130" y1="95" x2="130" y2="148"/>
+    <rect class="flow-box-action" x="60" y="148" width="200" height="48" filter="url(#fshadow)"/>
+    <text x="160" y="166" text-anchor="middle" class="flow-label" fill="#166534" font-weight="700" font-size="10">INSERT daily_reports</text>
+    <text x="160" y="180" text-anchor="middle" class="flow-label-desc" font-size="9">(student_id, report_date,</text>
+    <text x="160" y="192" text-anchor="middle" class="flow-label-desc" font-size="9">executed_hours, ...)</text>
+    <text x="126" y="138" class="flow-label" fill="#059669" font-size="10" font-weight="600">No (Nuevo)</text>
+
+    <!-- Merge upstream from both branches -->
+    <line class="flow-arrow" x1="130" y1="196" x2="130" y2="224"/>
+    <line class="flow-arrow" x1="470" y1="196" x2="470" y2="224"/>
+    <line stroke="#94a3b8" stroke-width="1.8" x1="130" y1="224" x2="470" y2="224"/>
+    <line class="flow-arrow" x1="330" y1="224" x2="330" y2="244"/>
+
+    <!-- Step 3 - second decision -->
+    <circle cx="36" cy="256" r="12" fill="#007A33"/>
+    <text x="36" y="261" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+    <polygon class="flow-box-decision" points="330,244 420,269 330,294 240,269" filter="url(#fshadow)"/>
+    <text x="330" y="267" text-anchor="middle" class="flow-label" font-size="10" font-weight="600">¿observacionAlumno.trim()?</text>
+    <text x="330" y="279" text-anchor="middle" class="flow-label" font-size="9">(Hay observaciones?)</text>
+
+    <!-- Yes: concatenate -->
+    <line class="flow-arrow" x1="420" y1="269" x2="470" y2="269"/>
+    <line class="flow-arrow" x1="470" y1="269" x2="470" y2="316"/>
+    <rect class="flow-box" x="380" y="316" width="220" height="32" filter="url(#fshadow)"/>
+    <text x="490" y="332" text-anchor="middle" class="flow-label" font-size="9">descripcionActividad</text>
+    <text x="490" y="344" text-anchor="middle" class="flow-label-desc" font-size="9">+ "\n\nObservaciones:\n" + observacion</text>
+
+    <!-- No: just description -->
+    <line class="flow-arrow" x1="240" y1="269" x2="130" y2="269"/>
+    <line class="flow-arrow" x1="130" y1="269" x2="130" y2="316"/>
+    <rect class="flow-box" x="60" y="316" width="180" height="32" filter="url(#fshadow)"/>
+    <text x="150" y="332" text-anchor="middle" class="flow-label" font-size="9">descripcionActividad</text>
+    <text x="150" y="344" text-anchor="middle" class="flow-label-desc" font-size="9">(sin concatenar nada)</text>
+
+    <!-- Merge downstream -->
+    <line class="flow-arrow" x1="130" y1="348" x2="130" y2="374"/>
+    <line class="flow-arrow" x1="470" y1="348" x2="470" y2="374"/>
+    <line stroke="#94a3b8" stroke-width="1.8" x1="130" y1="374" x2="470" y2="374"/>
+    <line class="flow-arrow" x1="330" y1="374" x2="330" y2="392"/>
+
+    <!-- Step 4 -->
+    <circle cx="36" cy="404" r="12" fill="#007A33"/>
+    <text x="36" y="409" text-anchor="middle" fill="white" font-size="12" font-weight="700">4</text>
+    <rect class="flow-box-action" x="56" y="392" width="240" height="28" filter="url(#fshadow)"/>
+    <text x="176" y="410" text-anchor="middle" class="flow-label-step" font-size="11">Reset del formulario</text>
+    <line class="flow-arrow" x1="296" y1="406" x2="360" y2="406"/>
+    <rect class="flow-box-action" x="360" y="392" width="244" height="28" filter="url(#fshadow)"/>
+    <text x="482" y="410" text-anchor="middle" class="flow-label-step" font-size="11">fetchReportsForStudent()</text>
+    <text x="482" y="418" class="flow-label-desc" font-size="8" fill="#94a3b8" text-anchor="middle">→ refresca bitácora</text>
+  </svg>
+
+  <h3>7.2 Mejora con IA</h3>
+  <svg class="svg-flow" viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="f2shadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/></filter></defs>
+
+    <!-- Step 1 -->
+    <circle cx="36" cy="28" r="12" fill="#007A33"/>
+    <text x="36" y="33" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+    <rect class="flow-box" x="56" y="16" width="440" height="28" filter="url(#f2shadow)"/>
+    <text x="276" y="34" text-anchor="middle" class="flow-label-step" font-size="11">Usuario hace clic en "✨ Mejorar con IA"</text>
+    <line class="flow-arrow" x1="276" y1="44" x2="276" y2="68"/>
+
+    <!-- Step 2 -->
+    <circle cx="36" cy="80" r="12" fill="#007A33"/>
+    <text x="36" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+    <rect class="flow-box-action" x="56" y="68" width="440" height="28" filter="url(#f2shadow)"/>
+    <text x="276" y="86" text-anchor="middle" class="flow-label-step" font-size="11">handleMejorarConIA()</text>
+    <line class="flow-arrow" x1="276" y1="96" x2="276" y2="120"/>
+
+    <!-- Step 3 -->
+    <circle cx="36" cy="132" r="12" fill="#007A33"/>
+    <text x="36" y="137" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+    <rect class="flow-box" x="56" y="120" width="500" height="28" filter="url(#f2shadow)"/>
+    <text x="306" y="138" text-anchor="middle" class="flow-label-step" font-size="11">setCargandoIA(true) — deshabilita botón, textarea bloqueado</text>
+    <line class="flow-arrow" x1="276" y1="148" x2="276" y2="172"/>
+
+    <!-- Step 4 -->
+    <circle cx="36" cy="184" r="12" fill="#007A33"/>
+    <text x="36" y="189" text-anchor="middle" fill="white" font-size="12" font-weight="700">4</text>
+    <rect class="flow-box" x="56" y="172" width="500" height="28" filter="url(#f2shadow)"/>
+    <text x="306" y="190" text-anchor="middle" class="flow-label-step" font-size="11">fetch POST /api/ai/enhance-description</text>
+    <text x="500" y="190" text-anchor="end" class="flow-label-desc" font-size="9">{ title, currentDescription }</text>
+    <line class="flow-arrow" x1="276" y1="200" x2="276" y2="224"/>
+
+    <!-- Step 5 - Backend -->
+    <circle cx="36" cy="236" r="12" fill="#d97706"/>
+    <text x="36" y="241" text-anchor="middle" fill="white" font-size="12" font-weight="700">5</text>
+    <rect class="flow-box-action" x="56" y="224" width="500" height="44" filter="url(#f2shadow)" fill="#fef3c7" stroke="#d97706"/>
+    <text x="306" y="242" text-anchor="middle" class="flow-label-step" fill="#92400e" font-size="11">Backend: enhanceDescription()</text>
+    <text x="306" y="258" text-anchor="middle" class="flow-label-desc" font-size="9">Valida → prompt profesional → Groq llama-3.3-70b → extrae texto</text>
+    <line class="flow-arrow" x1="276" y1="268" x2="276" y2="292"/>
+
+    <!-- Step 6 -->
+    <circle cx="36" cy="304" r="12" fill="#007A33"/>
+    <text x="36" y="309" text-anchor="middle" fill="white" font-size="12" font-weight="700">6</text>
+    <rect class="flow-box-action" x="56" y="292" width="460" height="28" filter="url(#f2shadow)"/>
+    <text x="286" y="310" text-anchor="middle" class="flow-label-step" font-size="11">setDescripcionActividad(data.description)</text>
+    <line class="flow-arrow" x1="276" y1="320" x2="276" y2="344"/>
+
+    <!-- Step 7 -->
+    <circle cx="36" cy="356" r="12" fill="#007A33"/>
+    <text x="36" y="361" text-anchor="middle" fill="white" font-size="12" font-weight="700">7</text>
+    <rect class="flow-box" x="56" y="344" width="460" height="28" filter="url(#f2shadow)"/>
+    <text x="286" y="362" text-anchor="middle" class="flow-label-step" font-size="11">setCargandoIA(false) — restaura botón e interactividad</text>
+  </svg>
+</div>
+
+<div class="page">
+  <h3>7.3 Aprobación/Rechazo (Profesor)</h3>
+  <svg class="svg-flow" viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="f3shadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/></filter></defs>
+
+    <!-- Step 1 -->
+    <circle cx="36" cy="28" r="12" fill="#007A33"/>
+    <text x="36" y="33" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+    <rect class="flow-box" x="56" y="16" width="480" height="28" filter="url(#f3shadow)"/>
+    <text x="296" y="34" text-anchor="middle" class="flow-label-step" font-size="11">Profesor inicia sesión</text>
+    <text x="460" y="34" text-anchor="end" class="flow-label-desc" font-size="9">faculty + career desde profile</text>
+    <line class="flow-arrow" x1="296" y1="44" x2="296" y2="66"/>
+
+    <!-- Step 1b -->
+    <rect class="flow-box" x="56" y="68" width="480" height="26" filter="url(#f3shadow)"/>
+    <text x="296" y="85" text-anchor="middle" class="flow-label-step" font-size="11">Selecciona ciclo + paralelo → consulta student_data</text>
+    <line class="flow-arrow" x1="296" y1="94" x2="296" y2="116"/>
+
+    <!-- Step 2 -->
+    <circle cx="36" cy="128" r="12" fill="#007A33"/>
+    <text x="36" y="133" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+    <rect class="flow-box" x="56" y="116" width="480" height="26" filter="url(#f3shadow)"/>
+    <text x="296" y="133" text-anchor="middle" class="flow-label-step" font-size="11">handleSeleccionarEstudianteDocente()</text>
+    <text x="460" y="133" text-anchor="end" class="flow-label-desc" font-size="9">daily_reports WHERE student_id = id</text>
+    <line class="flow-arrow" x1="296" y1="142" x2="296" y2="168"/>
+
+    <!-- Step 3 - split -->
+    <circle cx="36" cy="180" r="12" fill="#007A33"/>
+    <text x="36" y="185" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+    <rect class="flow-box" x="56" y="168" width="480" height="26" filter="url(#f3shadow)"/>
+    <text x="296" y="185" text-anchor="middle" class="flow-label-step" font-size="11">Profesor decide acción sobre el informe</text>
+
+    <!-- Approve -->
+    <line class="flow-arrow" x1="170" y1="194" x2="170" y2="218"/>
+    <rect class="flow-box-action" x="50" y="220" width="240" height="56" filter="url(#f3shadow)"/>
+    <text x="170" y="238" text-anchor="middle" class="flow-label" fill="#166534" font-weight="700" font-size="11">✓ Aprobar</text>
+    <text x="170" y="254" text-anchor="middle" class="flow-label-desc" font-size="9">handleAprobarInforme(id)</text>
+    <text x="170" y="268" text-anchor="middle" class="flow-label-desc" font-size="9">UPDATE SET approval_status = 'APROBADO'</text>
+    <text x="170" y="210" class="flow-label" fill="#059669" font-size="10" font-weight="600" text-anchor="middle">APROBAR</text>
+
+    <!-- Reject -->
+    <line class="flow-arrow" x1="420" y1="194" x2="420" y2="218"/>
+    <rect class="flow-box-action" x="300" y="220" width="250" height="56" filter="url(#f3shadow)" fill="#fef2f2" stroke="#ef4444"/>
+    <text x="425" y="238" text-anchor="middle" class="flow-label" fill="#991b1b" font-weight="700" font-size="11">✗ Rechazar</text>
+    <text x="425" y="254" text-anchor="middle" class="flow-label-desc" font-size="9">handleOpenRejectModal()</text>
+    <text x="425" y="268" text-anchor="middle" class="flow-label-desc" font-size="9">Modal → motivo → handleConfirmReject()</text>
+    <text x="425" y="210" class="flow-label" fill="#dc2626" font-size="10" font-weight="600" text-anchor="middle">RECHAZAR</text>
+
+    <!-- Merge -->
+    <line class="flow-arrow" x1="170" y1="276" x2="170" y2="304"/>
+    <line class="flow-arrow" x1="420" y1="276" x2="420" y2="304"/>
+    <line stroke="#94a3b8" stroke-width="1.8" x1="170" y1="304" x2="420" y2="304"/>
+    <line class="flow-arrow" x1="296" y1="304" x2="296" y2="326"/>
+
+    <!-- Step 4 -->
+    <circle cx="36" cy="328" r="12" fill="#007A33"/>
+    <text x="36" y="333" text-anchor="middle" fill="white" font-size="12" font-weight="700">4</text>
+    <rect class="flow-box-action" x="56" y="316" width="480" height="36" filter="url(#f3shadow)"/>
+    <text x="296" y="338" text-anchor="middle" class="flow-label-step" font-size="11">Refresca informes del estudiante seleccionado</text>
+    <text x="470" y="338" text-anchor="end" class="flow-label-desc" font-size="9">fetchReportsForStudent()</text>
+  </svg>
+
+  <h3>7.4 Generación de Word</h3>
+  <svg class="svg-flow" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="f4shadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/></filter></defs>
+
+    <!-- Step 1 -->
+    <circle cx="36" cy="28" r="12" fill="#007A33"/>
+    <text x="36" y="33" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+    <rect class="flow-box" x="56" y="16" width="410" height="28" filter="url(#f4shadow)"/>
+    <text x="261" y="34" text-anchor="middle" class="flow-label-step" font-size="11">Usuario hace clic en "Descargar Formato Institucional"</text>
+    <line class="flow-arrow" x1="261" y1="44" x2="261" y2="68"/>
+
+    <!-- Step 2 -->
+    <circle cx="36" cy="80" r="12" fill="#007A33"/>
+    <text x="36" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+    <rect class="flow-box" x="56" y="68" width="410" height="28" filter="url(#f4shadow)"/>
+    <text x="261" y="86" text-anchor="middle" class="flow-label-step" font-size="11">Filtra informes con estado === 'APROBADO'</text>
+    <line class="flow-arrow" x1="261" y1="96" x2="261" y2="118"/>
+
+    <!-- Decision: any approved? -->
+    <polygon class="flow-box-decision" points="261,118 342,142 261,166 180,142" filter="url(#f4shadow)"/>
+    <text x="261" y="140" text-anchor="middle" class="flow-label" font-size="10" font-weight="600">¿Hay aprobados?</text>
+
+    <!-- No -->
+    <line class="flow-arrow" x1="342" y1="142" x2="420" y2="142"/>
+    <rect class="flow-box" x="420" y="130" width="150" height="24" filter="url(#f4shadow)" fill="#fef2f2" stroke="#ef4444"/>
+    <text x="495" y="146" text-anchor="middle" class="flow-label" fill="#991b1b" font-size="10" font-weight="600">No → return + error</text>
+
+    <!-- Yes -->
+    <line class="flow-arrow" x1="180" y1="142" x2="100" y2="142"/>
+    <line class="flow-arrow" x1="100" y1="142" x2="100" y2="194"/>
+
+    <!-- Step 3 -->
+    <circle cx="36" cy="194" r="12" fill="#007A33"/>
+    <text x="36" y="199" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+    <rect class="flow-box" x="56" y="182" width="410" height="28" filter="url(#f4shadow)"/>
+    <text x="261" y="200" text-anchor="middle" class="flow-label-step" font-size="11">fetch('/plantilla_institucional.docx') → ArrayBuffer</text>
+    <line class="flow-arrow" x1="261" y1="210" x2="261" y2="234"/>
+
+    <!-- Step 4 -->
+    <circle cx="36" cy="246" r="12" fill="#007A33"/>
+    <text x="36" y="251" text-anchor="middle" fill="white" font-size="12" font-weight="700">4</text>
+    <rect class="flow-box" x="56" y="234" width="480" height="28" filter="url(#f4shadow)"/>
+    <text x="296" y="252" text-anchor="middle" class="flow-label-step" font-size="11">new PizZip(arrayBuffer) + new Docxtemplater(zip)</text>
+    <line class="flow-arrow" x1="261" y1="262" x2="261" y2="286"/>
+
+    <!-- Step 5 -->
+    <circle cx="36" cy="298" r="12" fill="#007A33"/>
+    <text x="36" y="303" text-anchor="middle" fill="white" font-size="12" font-weight="700">5</text>
+    <rect class="flow-box" x="56" y="286" width="500" height="28" filter="url(#f4shadow)"/>
+    <text x="306" y="304" text-anchor="middle" class="flow-label-step" font-size="11">Renderiza: {FACULTAD} {CARRERA} {#informes}...{/informes}</text>
+    <line class="flow-arrow" x1="261" y1="314" x2="261" y2="338"/>
+
+    <!-- Step 6 -->
+    <circle cx="36" cy="350" r="12" fill="#007A33"/>
+    <text x="36" y="355" text-anchor="middle" fill="white" font-size="12" font-weight="700">6</text>
+    <rect class="flow-box-action" x="56" y="338" width="500" height="28" filter="url(#f4shadow)"/>
+    <text x="306" y="356" text-anchor="middle" class="flow-label-step" font-size="11">doc.getZip().generate({ type:'blob' }) → saveAs(blob, ...docx)</text>
+
+    <!-- Success badge -->
+    <rect class="flow-box" x="280" y="370" width="220" height="20" rx="10" fill="#dcfce7" stroke="#007A33"/>
+    <text x="390" y="383" text-anchor="middle" class="flow-label" fill="#166534" font-weight="700" font-size="10">✓ Descarga completada</text>
+  </svg>
+
+  <h3>7.5 Dashboard del Profesor</h3>
+  <svg class="svg-flow" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="f5shadow" x="-4%" y="-4%" width="110%" height="112%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05"/></filter></defs>
+
+    <!-- Step 1 -->
+    <circle cx="36" cy="28" r="12" fill="#007A33"/>
+    <text x="36" y="33" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+    <rect class="flow-box" x="56" y="16" width="480" height="28" filter="url(#f5shadow)"/>
+    <text x="296" y="34" text-anchor="middle" class="flow-label-step" font-size="11">fetchAnalyticsData()</text>
+
+    <!-- Sub-steps stacked -->
+    <line class="flow-arrow" x1="296" y1="44" x2="296" y2="64"/>
+    <rect class="flow-box" x="56" y="64" width="480" height="22" filter="url(#f5shadow)"/>
+    <text x="296" y="79" text-anchor="middle" class="flow-label" font-size="10">Obtiene IDs de estudiantesFiltrados</text>
+
+    <line class="flow-arrow" x1="296" y1="86" x2="296" y2="96"/>
+    <rect class="flow-box" x="56" y="96" width="480" height="22" filter="url(#f5shadow)"/>
+    <text x="296" y="111" text-anchor="middle" class="flow-label" font-size="10">Consulta daily_reports WHERE student_id IN (ids)</text>
+
+    <line class="flow-arrow" x1="296" y1="118" x2="296" y2="128"/>
+    <rect class="flow-box" x="56" y="128" width="480" height="22" filter="url(#f5shadow)"/>
+    <text x="296" y="143" text-anchor="middle" class="flow-label" font-size="10">Procesa: agrupa horas aprobadas + cuenta estados + calcula riesgo</text>
+
+    <line class="flow-arrow" x1="296" y1="150" x2="296" y2="170"/>
+
+    <!-- Step 2 -->
+    <circle cx="36" cy="182" r="12" fill="#007A33"/>
+    <text x="36" y="187" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+    <rect class="flow-box" x="56" y="170" width="480" height="28" filter="url(#f5shadow)"/>
+    <text x="296" y="188" text-anchor="middle" class="flow-label-step" font-size="11">Almacena todo en analyticsData</text>
+
+    <line class="flow-arrow" x1="296" y1="198" x2="296" y2="220"/>
+
+    <!-- Step 3 - Recharts visualization -->
+    <circle cx="36" cy="232" r="12" fill="#d97706"/>
+    <text x="36" y="237" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+
+    <!-- Main visualization box -->
+    <rect class="flow-box" x="56" y="220" width="500" height="60" filter="url(#f5shadow)" fill="#fffbeb" stroke="#d97706"/>
+
+    <!-- BarChart -->
+    <rect x="72" y="232" width="16" height="24" rx="2" fill="none" stroke="#d97706" stroke-width="1.5"/>
+    <rect x="76" y="240" width="4" height="16" rx="1" fill="#d97706"/>
+    <rect x="82" y="236" width="4" height="20" rx="1" fill="#d97706"/>
+    <text x="100" y="244" class="flow-label" font-weight="700" font-size="11">&lt;BarChart&gt;</text>
+    <text x="100" y="258" class="flow-label-desc" font-size="9">Horas aprobadas por estudiante</text>
+
+    <!-- Separator line -->
+    <line x1="260" y1="230" x2="260" y2="275" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- PieChart -->
+    <circle cx="300" cy="244" r="10" fill="none" stroke="#d97706" stroke-width="1.5"/>
+    <path d="M300 244 L300 234 A10 10 0 0 1 310 244 Z" fill="#d97706"/>
+    <text x="322" y="244" class="flow-label" font-weight="700" font-size="11">&lt;PieChart&gt;</text>
+    <text x="322" y="258" class="flow-label-desc" font-size="9">Distribución estados</text>
+
+    <!-- Separator -->
+    <line x1="460" y1="230" x2="460" y2="275" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- Risk traffic light -->
+    <circle cx="482" cy="238" r="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/>
+    <circle cx="482" cy="252" r="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+    <circle cx="482" cy="266" r="5" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/>
+    <text x="496" y="246" class="flow-label-desc" font-size="8">Semáforo</text>
+    <text x="496" y="258" class="flow-label-desc" font-size="8">riesgo</text>
+  </svg>
+
+  <h3>7.6 Ciclo de Vida Transaccional del Estado de los Reportes</h3>
+  <p>El estado de cada reporte sigue un ciclo de vida transaccional estricto: <strong>PENDIENTE</strong> → <strong>APROBADO</strong> o <strong>RECHAZADO</strong> → <strong>CORREGIDO</strong> (retorno a PENDIENTE). Cuando un docente rechaza un informe, el sistema persiste el estado <code>RECHAZADO</code> y el campo <code>feedback</code> con la retroalimentación obligatoria. El alumno visualiza el motivo del rechazo y puede editar el reporte exclusivamente en este estado. Al guardar la corrección, el frontend ejecuta <code>UPDATE daily_reports SET approval_status = 'PENDIENTE', feedback = NULL, operational_notes = ? WHERE id = ?</code>. La mutación automática del campo <code>feedback</code> a <code>NULL</code> y la restauración del estado a <code>PENDIENTE</code> son críticas para evitar bloqueos lógicos en la cola de revisión del docente: si no se reseteara el estado, el profesor no podría volver a evaluar el informe corregido. Este diseño garantiza que cada corrección reinicie el flujo de aprobación desde cero, manteniendo la integridad referencial del historial de retroalimentación.</p>
+
+  <h3>7.7 Aislamiento de Datos con Row-Level Security (RLS)</h3>
+  <p>Las tablas de Supabase a las que el frontend accede directamente (<code>profiles</code>, <code>student_data</code>, <code>daily_reports</code>) están protegidas mediante <strong>Políticas de Seguridad de Filas (RLS)</strong> de PostgreSQL. RLS opera a nivel de fila evaluando predicados definidos en políticas antes de ejecutar cualquier operación DML. Por ejemplo, la política para <code>daily_reports</code> verifica que <code>student_id = auth.uid()</code> en operaciones SELECT e INSERT, impidiendo que un alumno consulte o altere registros de otro mediante llamadas directas a la API de Supabase REST. Para las operaciones UPDATE y DELETE, la política refuerza adicionalmente que el reporte pertenezca al usuario autenticado. Este aislamiento cliente-servidor es transparente para el SDK de Supabase, que inyecta automáticamente el token JWT de sesión en cada petición. Sin RLS, un estudiante malintencionado podría modificar el <code>student_id</code> en el payload JSON de una petición HTTP directa y adulterar la bitácora de terceros; RLS mitiga este vector de ataque a nivel de base de datos.</p>
+
+</div>
+
+<!-- ==================== 8. DEPENDENCIAS ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">8</span>Dependencias</h2>
+  <div class="sep"></div>
+
+  <h3>Frontend</h3>
+  <table>
+    <thead><tr><th>Paquete</th><th>Versión</th><th>Categoría</th><th>Propósito</th></tr></thead>
+    <tbody>
+      <tr><td>react</td><td>^19.2.6</td><td>Producción</td><td>Framework de UI</td></tr>
+      <tr><td>react-dom</td><td>^19.2.6</td><td>Producción</td><td>Renderizado DOM</td></tr>
+      <tr><td>@supabase/supabase-js</td><td>^2.108.2</td><td>Producción</td><td>Cliente Supabase</td></tr>
+      <tr><td>docxtemplater</td><td>^3.69.0</td><td>Producción</td><td>Generación Word con plantillas</td></tr>
+      <tr><td>file-saver</td><td>^2.0.5</td><td>Producción</td><td>Descarga de archivos</td></tr>
+      <tr><td>pizzip</td><td>^3.2.0</td><td>Producción</td><td>Manejo de archivos ZIP</td></tr>
+      <tr><td>recharts</td><td>^3.8.1</td><td>Producción</td><td>Gráficos (dashboard)</td></tr>
+      <tr><td>vite</td><td>^8.0.12</td><td>Desarrollo</td><td>Bundler y dev server</td></tr>
+      <tr><td>@vitejs/plugin-react</td><td>^6.0.1</td><td>Desarrollo</td><td>Plugin React para Vite</td></tr>
+      <tr><td>tailwindcss</td><td>^4.3.1</td><td>Desarrollo</td><td>Framework CSS</td></tr>
+      <tr><td>typescript</td><td>^6.0.3</td><td>Desarrollo</td><td>Superconjunto tipado</td></tr>
+      <tr><td>eslint</td><td>^10.3.0</td><td>Desarrollo</td><td>Linter</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Backend</h3>
+  <table>
+    <thead><tr><th>Paquete</th><th>Versión</th><th>Categoría</th><th>Propósito</th></tr></thead>
+    <tbody>
+      <tr><td>express</td><td>^4.21.2</td><td>Producción</td><td>Framework HTTP</td></tr>
+      <tr><td>@prisma/client</td><td>5.22.0</td><td>Producción</td><td>ORM PostgreSQL</td></tr>
+      <tr><td>bcryptjs</td><td>^2.4.3</td><td>Producción</td><td>Hashing de contraseñas</td></tr>
+      <tr><td>cors</td><td>^2.8.6</td><td>Producción</td><td>Middleware CORS</td></tr>
+      <tr><td>dotenv</td><td>^16.4.7</td><td>Producción</td><td>Variables de entorno</td></tr>
+      <tr><td>jsonwebtoken</td><td>^9.0.10</td><td>Producción</td><td>Tokens JWT</td></tr>
+      <tr><td>openai</td><td>^6.44.0</td><td>Producción</td><td>Cliente Groq (API OpenAI compatible)</td></tr>
+      <tr><td>typescript</td><td>5.6.3</td><td>Desarrollo</td><td>Lenguaje tipado</td></tr>
+      <tr><td>ts-node-dev</td><td>^2.0.0</td><td>Desarrollo</td><td>Hot reload TypeScript</td></tr>
+      <tr><td>prisma</td><td>5.22.0</td><td>Desarrollo</td><td>CLI Prisma (migraciones)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 9. COMANDOS ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">9</span>Comandos de Desarrollo</h2>
+  <div class="sep"></div>
+
+  <div class="card">
+    <div class="card-grid">
+      <div class="card-item">
+        <div class="card-label">Frontend: dev</div>
+        <div class="card-value"><code>npm run dev</code></div>
+        <div class="card-desc">Inicia Vite en puerto 5173 con hot reload</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Frontend: build</div>
+        <div class="card-value"><code>npm run build</code></div>
+        <div class="card-desc">Compila a producción en dist/</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Backend: dev</div>
+        <div class="card-value"><code>npm run dev</code></div>
+        <div class="card-desc">Express con ts-node-dev (hot reload, puerto 5000)</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Backend: build</div>
+        <div class="card-value"><code>npm run build</code></div>
+        <div class="card-desc">Compila TypeScript → dist/</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Backend: start</div>
+        <div class="card-value"><code>npm run start</code></div>
+        <div class="card-desc">Ejecuta build en producción</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Prisma: generate</div>
+        <div class="card-value"><code>npm run prisma:generate</code></div>
+        <div class="card-desc">Genera cliente Prisma</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Inicio Rápido (desarrollo local)</h3>
+  <div class="flow">
+<span class="comment"># 1. Clonar repositorio</span>
+git clone &lt;repo&gt; && cd practicas360
+
+<span class="comment"># 2. Configurar variables de entorno</span>
+cp BackEnd/.env.example BackEnd/.env
+<span class="comment"># Editar .env con DATABASE_URL, JWT_SECRET, GROQ_API_KEY</span>
+
+<span class="comment"># 3. Iniciar backend</span>
+cd BackEnd
+npm install
+npm run dev
+
+<span class="comment"># 4. En otra terminal, iniciar frontend</span>
+cd FrontEnd
+npm install
+npm run dev
+
+<span class="comment"># 5. Abrir navegador en http://localhost:5173</span></div>
+</div>
+
+<!-- ==================== 10. GUÍA DE TESTEO ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">10</span>Guía de Testeo</h2>
+  <div class="sep"></div>
+
+  <p>Esta sección describe cómo probar cada funcionalidad del sistema, incluyendo las credenciales de prueba necesarias.</p>
+
+  <h3>10.1 Configuración de Datos de Prueba en Supabase</h3>
+  <p>Copia y pega el siguiente bloque SQL directamente en el Editor SQL de Supabase (Dashboard → SQL Editor) para crear todos los datos de prueba en un solo paso. Los UUIDs se generan automáticamente.</p>
+
+  <div class="note info">📋 <strong>Script SQL completo — Cópialo y pégualo en Supabase SQL Editor:</strong></div>
+  <div class="flow" style="font-size: 9.5px; line-height: 1.6;">
+<span class="comment">-- ============================================</span>
+<span class="comment">-- DATOS DE PRUEBA - PRÁCTICAS 360</span>
+<span class="comment">-- ============================================</span>
+
+<span class="comment">-- 1. Clave de registro para docentes</span>
+INSERT INTO teacher_keys (id, key, description)
+VALUES (
+  gen_random_uuid(),
+  'DOC-2026-UTE-LVT',
+  'Clave principal de prueba'
+);
+
+<span class="comment">-- 2. Curso (contraseña del profesor)</span>
+INSERT INTO course_passwords (id, password, faculty, career, cycle, parallel)
+VALUES (
+  gen_random_uuid(),
+  'curso2024',
+  'Facultad de Ingenierías',
+  'Tecnologías de la Información (TI)',
+  '8vo',
+  'A'
+);
+
+<span class="comment">-- 2. Perfiles (deben crearse DESPUÉS del registro desde la UI)</span>
+<span class="comment">-- Primero registra manualmente: alumno@test.com / pass123 / ALUMNO</span>
+<span class="comment">-- y profesor@test.com / pass123 / PROFESOR desde el formulario de registro</span>
+
+<span class="comment">-- 3. Datos del estudiante (ajusta profile_id tras el registro)</span>
+<span class="comment">-- Ejecuta: SELECT id FROM profiles WHERE email = 'alumno@test.com';</span>
+<span class="comment">-- Luego reemplaza 'uuid-del-alumno' con el resultado:</span>
+INSERT INTO student_data (profile_id, faculty, career, cycle, parallel, company_name, technical_area, cedula, supervisor_name)
+VALUES (
+  'uuid-del-alumno',  <span class="comment">-- ← REEMPLAZAR con el UUID real</span>
+  'Facultad de Ingenierías',
+  'Tecnologías de la Información (TI)',
+  '8vo',
+  'A',
+  'TechCorp S.A.',
+  'Desarrollo de Software',
+  '1723456789',
+  'Ing. Roberto Gómez'
+);
+
+<span class="comment">-- 4. (Opcional) Insertar informes de prueba directamente</span>
+INSERT INTO daily_reports (id, student_id, report_date, executed_hours, technical_description, operational_notes, approval_status)
+VALUES
+  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-01', 4, 'Instalación de redes', 'Configuración de switches y routers en oficina central. Se implementó topología en estrella.', 'APROBADO'),
+  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-02', 3, 'Mantenimiento de equipos', 'Limpieza y diagnóstico de 15 estaciones de trabajo. Se reemplazaron 2 discos duros.', 'APROBADO'),
+  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-03', 5, 'Desarrollo de módulo web', 'Implementación del módulo de autenticación con JWT en React. Pruebas unitarias exitosas.', 'PENDIENTE');</div>
+
+  <h3 class="sub">Credenciales de Prueba para Copiar y Pegar</h3>
+  <table>
+    <thead><tr><th>Rol</th><th>Email</th><th>Contraseña</th><th>Nombre</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-green">ALUMNO</span></td><td><code>alumno@test.com</code></td><td><code>Test123!</code></td><td>Carlos Andrés Medina</td></tr>
+      <tr><td><span class="badge badge-amber">PROFESOR</span></td><td><code>profesor@test.com</code></td><td><code>Test123!</code></td><td>Dr. María Fernanda López</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Nota:</strong> Registra ambos usuarios manualmente desde la UI con los datos de la tabla. Los perfiles en <code>profiles</code> se crean automáticamente. Luego ejecuta el INSERT de <code>student_data</code> con el UUID real del alumno.</p>
+
+  <h3 class="sub">Migración: Agregar Faculty/Career a Profiles</h3>
+  <p>Para que el nuevo flujo funcione, ejecuta esta migración en el SQL Editor de Supabase:</p>
+  <div class="flow" style="font-size: 9.5px;">
+<span class="comment">-- Agrega facultad y carrera a la tabla profiles</span>
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS faculty TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS career TEXT;
+
+<span class="comment">-- Actualiza profesores existentes (reemplaza con sus datos reales)</span>
+UPDATE profiles SET faculty = 'Facultad de Ingenierías', career = 'Tecnologías de la Información (TI)' WHERE role = 'PROFESOR';</div>
+
+  <h3 class="sub">Contraseñas de Curso</h3>
+  <p>Si se usa el flujo anterior con <code>course_passwords</code>, la contraseña insertada en el SQL de prueba es:</p>
+  <table>
+    <thead><tr><th>Contraseña</th><th>Facultad</th><th>Carrera</th><th>Ciclo</th><th>Paralelo</th></tr></thead>
+    <tbody>
+      <tr><td><code>curso2024</code></td><td>Facultad de Ingenierías</td><td>Tecnologías de la Información (TI)</td><td>8vo</td><td>A</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Nuevo flujo:</strong> El profesor ya no necesita contraseña de curso. Al registrarse, selecciona su facultad y carrera. Al iniciar sesión, solo elige ciclo y paralelo para ver sus estudiantes.</p>
+
+  <div class="note warn">⚠ <strong>Consulta SQL para obtener el UUID del alumno:</strong><br><code>SELECT id, email FROM profiles WHERE email = 'alumno@test.com';</code></div>
+</div>
+
+<div class="page">
+  <h3>10.2 Plan de Pruebas por Funcionalidad</h3>
+
+  <h3 class="sub">Prueba 1: Registro de Alumno</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Ir a <code>http://localhost:5173</code></td><td>Ver pantalla de login</td></tr>
+      <tr><td>2</td><td>Hacer clic en "Registrarse"</td><td>Ver formulario de registro</td></tr>
+      <tr><td>3</td><td>Seleccionar rol "Alumno"</td><td>Ver campos: nombre completo, correo auto-generado (deshabilitado), facultad, carrera, ciclo, paralelo</td></tr>
+      <tr><td>4</td><td>Escribir nombre completo (ej: <code>Mercedes Jenith Paredes Montaño</code>)</td><td>El correo se auto-genera: <code>mercedes.paredes.montano@utelvt.edu.ec</code></td></tr>
+      <tr><td>5</td><td>Llenar demás campos y enviar</td><td>Mensaje "Registro exitoso" y redirige al login con email/contraseña pre-rellenados</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 2: Inicio de Sesión (Alumno)</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Ingresar email y contraseña del alumno registrado</td><td>—</td></tr>
+      <tr><td>2</td><td>Hacer clic en "Iniciar Sesión"</td><td>Redirige a vista de Alumno con formulario y bitácora vacía</td></tr>
+      <tr><td>3</td><td>Verificar barra superior</td><td>Nombre del alumno, empresa y botón "Cerrar Sesión"</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 3: Creación de Informe</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Seleccionar fecha, ingresar 4 horas</td><td>—</td></tr>
+      <tr><td>2</td><td>Escribir título "Instalación de redes"</td><td>—</td></tr>
+      <tr><td>3</td><td>Hacer clic en "✨ Mejorar con IA"</td><td>El botón cambia a "Mejorando..." y el textarea se llena con una descripción técnica generada por Groq</td></tr>
+      <tr><td>4</td><td>Hacer clic en "Guardar Informe"</td><td>Mensaje de éxito y el informe aparece en la bitácora</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 4: Edición y Eliminación</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>En bitácora, verificar estado del informe</td><td>Debe mostrar "Pendiente" con badge ámbar</td></tr>
+      <tr><td>2</td><td>Verificar que botón "Editar" esté deshabilitado</td><td>Debe mostrar "Bloqueado" (solo se editan Rechazados)</td></tr>
+      <tr><td>3</td><td>Hacer clic en "Eliminar"</td><td>Confirmar diálogo → el informe desaparece de la bitácora</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="page">
+  <h3 class="sub">Prueba 5: Registro e Inicio de Sesión (Profesor)</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Cerrar sesión, ir a registro</td><td>—</td></tr>
+      <tr><td>2</td><td>Seleccionar rol "Profesor", llenar nombre completo (ej: <code>Luis Fernando Pérez Gómez</code>)</td><td>Correo se auto-genera: <code>luis.perez.gomez@utelvt.edu.ec</code> (campo deshabilitado)</td></tr>
+      <tr><td>3</td><td>Seleccionar facultad, carrera e ingresar contraseña y clave docente</td><td>—</td></tr>
+      <tr><td>4</td><td>Hacer clic en "Crear Cuenta"</td><td>Registro exitoso, redirige al login con email/contraseña pre-rellenados</td></tr>
+      <tr><td>5</td><td>Intentar registrar otro profesor con la misma clave docente</td><td>Error: "Esta clave de registro ya fue utilizada"</td></tr>
+      <tr><td>6</td><td>Iniciar sesión con las credenciales pre-rellenadas</td><td>Redirige a vista Profesor con sección "Selección de Curso"</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 6: Carga de Alumnos (Profesor)</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Verificar que facultad y carrera aparecen precargadas del perfil</td><td>Campos de solo lectura con los datos registrados</td></tr>
+      <tr><td>2</td><td>Seleccionar ciclo (ej: 8vo Ciclo)</td><td>—</td></tr>
+      <tr><td>3</td><td>Seleccionar paralelo (ej: Paralelo A)</td><td>—</td></tr>
+      <tr><td>4</td><td>Ingresar la clave del curso: <code>curso2024</code></td><td>—</td></tr>
+      <tr><td>5</td><td>Hacer clic en "Cargar"</td><td>Aparece lista de alumnos del curso y se habilita pestaña "Dashboard"</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 7: Aprobación/Rechazo de Informes</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Seleccionar un alumno de la lista</td><td>Ver su bitácora de informes</td></tr>
+      <tr><td>2</td><td>Hacer clic en "✓ Aprobar" en un informe</td><td>Estado cambia a "Aprobado" con badge verde</td></tr>
+      <tr><td>3</td><td>Hacer clic en "✗ Rechazar" en otro informe</td><td>Se abre modal</td></tr>
+      <tr><td>4</td><td>Escribir motivo y confirmar</td><td>Estado cambia a "Rechazado" con badge rojo y muestra la retroalimentación</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 8: Dashboard</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Ir a pestaña "Dashboard"</td><td>Ver gráfico de barras con horas aprobadas</td></tr>
+      <tr><td>2</td><td>Verificar gráfico de pastel</td><td>Distribución de estados (Aprobados/Rechazados/Pendientes)</td></tr>
+      <tr><td>3</td><td>Verificar tarjetas de riesgo</td><td>Cada estudiante muestra: Crítico (&lt;4), Moderado (4-6) o Bajo (&gt;6)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="page">
+  <h3 class="sub">Prueba 9: Generación de Word</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Iniciar sesión como alumno con informes aprobados</td><td>—</td></tr>
+      <tr><td>2</td><td>Hacer clic en "Descargar Formato Institucional"</td><td>Se descarga archivo .docx</td></tr>
+      <tr><td>3</td><td>Abrir el archivo descargado</td><td>Debe contener los datos del estudiante y los informes aprobados en formato institucional</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">Prueba 10: Perfiles</h3>
+  <table>
+    <thead><tr><th>Paso</th><th>Acción</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Como alumno, ir a "Perfil"</td><td>Ver formulario con datos precargados</td></tr>
+      <tr><td>2</td><td>Modificar empresa, área y tutor empresarial</td><td>—</td></tr>
+      <tr><td>3</td><td>Guardar cambios</td><td>Mensaje de éxito y datos actualizados en la barra superior</td></tr>
+      <tr><td>4</td><td>Como profesor, ir a "Mi Perfil"</td><td>Ver y editar nombre y correo</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.3 Casos Borde para Probar</h3>
+  <table>
+    <thead><tr><th>Escenario</th><th>Procedimiento</th><th>Resultado Esperado</th></tr></thead>
+    <tbody>
+      <tr><td>Contraseña de curso incorrecta</td><td>Ingresar contraseña inválida</td><td>Mensaje: "La contraseña ingresada no existe en el sistema."</td></tr>
+      <tr><td>Informe sin descripción</td><td>Guardar con campo descripción vacío</td><td>El formulario no se envía (campo required)</td></tr>
+      <tr><td>Horas fuera de rango</td><td>Ingresar 0 o 9 en horas</td><td>El input type="number" con min=1 y max=8 lo impide</td></tr>
+      <tr><td>Rechazo sin motivo</td><td>Intentar confirmar rechazo sin texto</td><td>Mensaje: "Debe escribir el motivo del rechazo."</td></tr>
+      <tr><td>Dos informes misma fecha</td><td>Crear dos informes con la misma fecha</td><td>Error de base de datos por unique constraint</td></tr>
+      <tr><td>IA sin título</td><td>Hacer clic en "Mejorar con IA" sin título</td><td>Botón deshabilitado (disabled)</td></tr>
+      <tr><td>Descargar Word sin aprobados</td><td>Intentar generar Word sin informes aprobados</td><td>Mensaje: "No tienes informes con estado APROBADO"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 11. RECOMENDACIONES ==================== -->
+<div class="page">
+  <h2 class="section"><span class="num">11</span>Recomendaciones Técnicas</h2>
+  <div class="sep"></div>
+
+  <h3>11.1 Deuda Técnica Identificada</h3>
+  <table>
+    <thead><tr><th>#</th><th>Problema</th><th>Impacto</th><th>Sugerencia</th><th>Prioridad</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><strong>SPA monolítica</strong> (App.jsx ~1400 líneas)</td>
+        <td>Mantenibilidad baja, difícil escalar</td>
+        <td>Dividir en componentes: LoginForm, ActivityForm, ReportsTable, TeacherDashboard, ProfileForm</td>
+        <td><span class="badge badge-red">Alta</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Sin enrutador</strong></td>
+        <td>No hay URLs navegables ni deep linking</td>
+        <td>Implementar React Router v7+</td>
+        <td><span class="badge badge-red">Alta</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong>Dualidad de esquemas</strong> (Prisma vs Supabase)</td>
+        <td>Inconsistencia de datos a largo plazo</td>
+        <td>Unificar todo el CRUD a través del backend Express</td>
+        <td><span class="badge badge-red">Alta</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>Tablas manuales en Supabase</strong></td>
+        <td>Sin control de versiones del esquema</td>
+        <td>Migrar todas las tablas a Prisma Migrations</td>
+        <td><span class="badge badge-amber">Media</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><strong>Frontend sin TypeScript</strong></td>
+        <td>Errores en runtime detectables en compilación</td>
+        <td>Migrar FrontEnd a TypeScript</td>
+        <td><span class="badge badge-amber">Media</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><strong>Sin testing automatizado</strong></td>
+        <td>Calidad no verificable, regresiones frecuentes</td>
+        <td>Vitest (unitario) + Playwright (E2E)</td>
+        <td><span class="badge badge-amber">Media</span></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><strong>Sin paginación</strong></td>
+        <td>Problemas de rendimiento con muchos registros</td>
+        <td>Paginación en backend + frontend</td>
+        <td><span class="badge badge-green">Baja</span></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><strong>Claves API en repositorio</strong></td>
+        <td>Riesgo de seguridad</td>
+        <td>Rotar claves, agregar .env.example, usar secrets en producción</td>
+        <td><span class="badge badge-red">Alta</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>11.2 Mejoras Propuestas</h3>
+  <div class="card">
+    <div class="card-grid">
+      <div class="card-item">
+        <div class="card-label">Modularización</div>
+        <div class="card-value">Componentes separados</div>
+        <div class="card-desc">Dividir App.jsx en componentes con responsabilidad única</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Estado Global</div>
+        <div class="card-value">Context API / Zustand</div>
+        <div class="card-desc">Evitar prop drilling entre componentes</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Testing</div>
+        <div class="card-value">Vitest + Playwright</div>
+        <div class="card-desc">Pruebas unitarias y E2E completas</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">CI/CD</div>
+        <div class="card-value">GitHub Actions</div>
+        <div class="card-desc">Pipeline automático: lint → test → deploy</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Manejo de Errores</div>
+        <div class="card-value">Middleware centralizado</div>
+        <div class="card-desc">Estandarizar respuestas HTTP en backend</div>
+      </div>
+      <div class="card-item">
+        <div class="card-label">Seguridad</div>
+        <div class="card-value">Rate Limiting + Helmet</div>
+        <div class="card-desc">Proteger endpoints públicos (login, IA)</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>11.3 Escalabilidad</h3>
+  <p>Para escalar la aplicación a más facultades y usuarios, se recomienda:</p>
+  <ul>
+    <li>Separar el backend en <strong>microservicios</strong> (auth, reports, ai)</li>
+    <li>Implementar <strong>caché con Redis</strong> para consultas frecuentes (dashboard, lista de estudiantes)</li>
+    <li>Migrar a una base de datos dedicada con mayor capacidad (fuera de Supabase Free Tier)</li>
+    <li>Implementar <strong>rate limiting</strong> en endpoints públicos</li>
+    <li>Agregar <strong>logging centralizado</strong> (ELK Stack o similar)</li>
+    <li>Contenerizar con <strong>Docker</strong> para despliegues reproducibles</li>
+  </ul>
+</div>
+
+<!-- ==================== FIN ==================== -->
+<div class="page">
+  <h2 class="section" style="border-bottom-color: #e2e8f0;"><span class="num" style="background: #64748b;">◈</span>Acerca de este documento</h2>
+  <div class="sep"></div>
+  <br>
+  <p style="font-size: 12px;">Este documento fue generado automáticamente a partir del código fuente del proyecto <strong>Prácticas 360</strong>.</p>
+  <br>
+  <div class="card">
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="card-item"><div class="card-label">Proyecto</div><div class="card-value">Prácticas 360</div></div>
+      <div class="card-item"><div class="card-label">Versión</div><div class="card-value">1.0.0</div></div>
+      <div class="card-item"><div class="card-label">Tecnología</div><div class="card-value">HTML + CSS + JS</div></div>
+      <div class="card-item"><div class="card-label">Generado</div><div class="card-value">Documentación Técnica v1.0.0</div></div>
+    </div>
+  </div>
+  <br><br>
+  <p style="text-align: center; color: #94a3b8; font-size: 11px; letter-spacing: 2px;">— Fin del documento —</p>
+  <br>
+  <p style="text-align: center; color: #cbd5e1; font-size: 9px;">Universidad Tecnológica UTE - LVT • Sistema de Gestión de Prácticas Preprofesionales</p>
+</div>
+
+</body>
+</html>
