@@ -8,7 +8,7 @@ const generarEmailInstitucional = (nombreCompleto) => {
   const partes = nombreCompleto.trim().split(/\s+/);
   if (partes.length < 3) return '';
   const nombre = partes[0];
-  const apellidos = partes.slice(1);
+  const apellidos = partes.slice(-2);
   const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   return [nombre, ...apellidos].map(normalizar).join('.') + '@utelvt.edu.ec';
 };
@@ -530,6 +530,8 @@ export default function App() {
         if (studentErr) throw studentErr;
       }
 
+      setEmail(targetEmail);
+      setPassword(targetPassword);
       mostrarNotificacion('Registro exitoso. Ahora puede iniciar sesión.', 'exito');
       setIsRegisterMode(false);
     } catch (error) {
