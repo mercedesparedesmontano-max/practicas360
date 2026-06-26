@@ -158,11 +158,52 @@
 
   /* RESPONSIVE */
   @media (max-width: 768px) {
-    .page { padding: 10mm 8mm; }
-    .cover h1 { font-size: 32px; }
+    .page { padding: 8mm 6mm; }
+    .cover h1 { font-size: 28px; }
+    .cover h2 { font-size: 18px; }
+    .cover .shield { width: 60px; height: 60px; }
+    .cover .shield svg { width: 30px; height: 30px; }
+    .cover .meta { gap: 20px; }
     .card-grid { grid-template-columns: 1fr; }
-    table { font-size: 9px; }
-    thead th, tbody td { padding: 5px 8px; }
+    table { font-size: 8px; }
+    thead th, tbody td { padding: 4px 6px; }
+    h2.section { font-size: 20px; }
+    h2.section .num { width: 28px; height: 28px; font-size: 13px; }
+    h3 { font-size: 15px; }
+    .flow { font-size: 8px; padding: 10px 12px; }
+    .svg-diagram, .svg-flow { max-width: 100%; }
+    .toc-item { font-size: 10px; padding: 5px 6px; }
+    .toc-item.sub { padding-left: 18px; font-size: 9px; }
+    .note { font-size: 9px; padding: 8px 10px; }
+    .card-item { padding: 8px; }
+    .print-btn { bottom: 12px; right: 12px; padding: 10px 16px; font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    .page { padding: 6mm 4mm; }
+    .cover h1 { font-size: 22px; }
+    .cover h2 { font-size: 15px; }
+    .cover .line { width: 160px; }
+    .cover .meta { flex-direction: column; gap: 12px; }
+    .cover .subtitle { font-size: 12px; }
+    h2.section { font-size: 17px; }
+    h2.section .num { width: 24px; height: 24px; font-size: 11px; }
+    h3 { font-size: 13px; }
+    h3.sub { font-size: 12px; padding-left: 6px; }
+    p { font-size: 10px; }
+    ul li, ol li { font-size: 10px; }
+    table { font-size: 7px; }
+    thead th, tbody td { padding: 3px 4px; }
+    .flow { font-size: 7px; padding: 8px 10px; line-height: 1.6; }
+    .note { font-size: 8px; padding: 6px 8px; }
+    .card-value { font-size: 11px; }
+    .card-label { font-size: 8px; }
+    .badge { font-size: 7px; padding: 1px 5px; }
+    .print-btn { padding: 8px 12px; font-size: 10px; }
+    .print-btn svg { width: 14px; height: 14px; }
+    .cover .meta-item .meta-label { font-size: 8px; }
+    .cover .meta-item .meta-value { font-size: 11px; }
+    code { font-size: 8px; }
   }
 </style>
 </head>
@@ -751,7 +792,7 @@ enum ApprovalStatus { PENDIENTE, APROBADO, RECHAZADO }</div>
       <tr><td><code>profiles</code></td><td>id (uuid PK), role (varchar), full_name (varchar), email (varchar UNIQUE)</td><td>Perfiles de usuario sincronizados con auth</td></tr>
       <tr><td><code>student_data</code></td><td>profile_id (uuid PK FK → profiles.id), faculty (varchar), career (varchar), cycle (varchar), parallel (varchar), company_name (varchar), technical_area (varchar), cedula (varchar), supervisor_name (varchar)</td><td>Datos extendidos del estudiante</td></tr>
       <tr><td><code>course_passwords</code></td><td>id (uuid PK), password (varchar NOT NULL), faculty (varchar NOT NULL), career (varchar NOT NULL), cycle (varchar NOT NULL), parallel (varchar NOT NULL)</td><td>Contraseñas por curso para acceso docente</td></tr>
-      <tr><td><code>teacher_keys</code></td><td>id (uuid PK), key (varchar UNIQUE NOT NULL), description (text), used (boolean DEFAULT FALSE)</td><td>Claves de un solo uso para registro de docentes</td></tr>
+      <tr><td><s><code>teacher_keys</code></s></td><td><s>id (uuid PK), key (varchar UNIQUE NOT NULL), description (text), used (boolean DEFAULT FALSE)</s></td><td><span class="badge badge-red">DEPRECATED</span> Ya no se usa. Los docentes se registran con validación local de la clave <code>DOC-2026-UTE-LVT</code> sin consultar DB.</td></tr>
     </tbody>
   </table>
 
@@ -763,6 +804,9 @@ enum ApprovalStatus { PENDIENTE, APROBADO, RECHAZADO }</div>
       <tr><td>role</td><td>varchar(20)</td><td>NOT NULL</td><td>Rol del usuario: ALUMNO | PROFESOR</td></tr>
       <tr><td>full_name</td><td>varchar(255)</td><td>NOT NULL</td><td>Nombre completo del usuario</td></tr>
       <tr><td>email</td><td>varchar(255)</td><td>UNIQUE, NOT NULL</td><td>Correo electrónico institucional</td></tr>
+      <tr><td>faculty</td><td>varchar(255)</td><td>NULLABLE</td><td>Facultad del docente</td></tr>
+      <tr><td>career</td><td>varchar(255)</td><td>NULLABLE</td><td>Carrera del docente</td></tr>
+      <tr><td>created_at</td><td>timestamptz</td><td>DEFAULT NOW()</td><td>Fecha de creación del perfil</td></tr>
     </tbody>
   </table>
 
@@ -1305,24 +1349,15 @@ npm run dev
   <h3>10.1 Configuración de Datos de Prueba en Supabase</h3>
   <p>Copia y pega el siguiente bloque SQL directamente en el Editor SQL de Supabase (Dashboard → SQL Editor) para crear todos los datos de prueba en un solo paso. Los UUIDs se generan automáticamente.</p>
 
-  <div class="note info">📋 <strong>Script SQL completo — Cópialo y pégualo en Supabase SQL Editor:</strong></div>
+  <div class="note success">📋 <strong>Script SQL completo — Cópialo y pégualo en Supabase SQL Editor para crear datos de prueba:</strong></div>
   <div class="flow" style="font-size: 9.5px; line-height: 1.6;">
 <span class="comment">-- ============================================</span>
 <span class="comment">-- DATOS DE PRUEBA - PRÁCTICAS 360</span>
 <span class="comment">-- ============================================</span>
 
-<span class="comment">-- 1. Clave de registro para docentes</span>
-INSERT INTO teacher_keys (id, key, description)
+<span class="comment">-- 1. Curso (contraseña del profesor para acceder al curso)</span>
+INSERT INTO course_passwords (password, faculty, career, cycle, parallel)
 VALUES (
-  gen_random_uuid(),
-  'DOC-2026-UTE-LVT',
-  'Clave principal de prueba'
-);
-
-<span class="comment">-- 2. Curso (contraseña del profesor)</span>
-INSERT INTO course_passwords (id, password, faculty, career, cycle, parallel)
-VALUES (
-  gen_random_uuid(),
   'curso2024',
   'Facultad de Ingenierías',
   'Tecnologías de la Información (TI)',
@@ -1330,13 +1365,19 @@ VALUES (
   'A'
 );
 
-<span class="comment">-- 2. Perfiles (deben crearse DESPUÉS del registro desde la UI)</span>
-<span class="comment">-- Primero registra manualmente: alumno@test.com / pass123 / ALUMNO</span>
-<span class="comment">-- y profesor@test.com / pass123 / PROFESOR desde el formulario de registro</span>
+<span class="comment">-- 2. Perfiles: debes registrarlos DESDE LA UI del sistema.</span>
+<span class="comment">--    Registra estos usuarios manualmente en https://practicas360.onrender.com/</span>
+<span class="comment">--    Seleccionando "Registrarse" → elige el rol correspondiente.</span>
+<span class="comment">--</span>
+<span class="comment">--    Al registrarse, la UI crea automáticamente:</span>
+<span class="comment">--    - El usuario en Supabase Auth</span>
+<span class="comment">--    - El perfil en la tabla "profiles"</span>
+<span class="comment">--</span>
+<span class="comment">--    DESPUÉS del registro, obtén los UUIDs con:</span>
+<span class="comment">--    SELECT id, email, role FROM profiles;</span>
 
-<span class="comment">-- 3. Datos del estudiante (ajusta profile_id tras el registro)</span>
-<span class="comment">-- Ejecuta: SELECT id FROM profiles WHERE email = 'alumno@test.com';</span>
-<span class="comment">-- Luego reemplaza 'uuid-del-alumno' con el resultado:</span>
+<span class="comment">-- 3. Datos del estudiante (ejecutar DESPUÉS del registro desde la UI)</span>
+<span class="comment">--    Reemplaza 'uuid-del-alumno' con el UUID real obtenido del SELECT anterior</span>
 INSERT INTO student_data (profile_id, faculty, career, cycle, parallel, company_name, technical_area, cedula, supervisor_name)
 VALUES (
   'uuid-del-alumno',  <span class="comment">-- ← REEMPLAZAR con el UUID real</span>
@@ -1350,22 +1391,23 @@ VALUES (
   'Ing. Roberto Gómez'
 );
 
-<span class="comment">-- 4. (Opcional) Insertar informes de prueba directamente</span>
-INSERT INTO daily_reports (id, student_id, report_date, executed_hours, technical_description, operational_notes, approval_status)
+<span class="comment">-- 4. (Opcional) Informes de prueba directos (reemplazar uuid-del-alumno)</span>
+INSERT INTO daily_reports (student_id, report_date, executed_hours, technical_description, operational_notes, approval_status)
 VALUES
-  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-01', 4, 'Instalación de redes', 'Configuración de switches y routers en oficina central. Se implementó topología en estrella.', 'APROBADO'),
-  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-02', 3, 'Mantenimiento de equipos', 'Limpieza y diagnóstico de 15 estaciones de trabajo. Se reemplazaron 2 discos duros.', 'APROBADO'),
-  (gen_random_uuid(), 'uuid-del-alumno', '2025-06-03', 5, 'Desarrollo de módulo web', 'Implementación del módulo de autenticación con JWT en React. Pruebas unitarias exitosas.', 'PENDIENTE');</div>
+  ('uuid-del-alumno', '2025-06-01', 4, 'Instalación de redes', 'Configuración de switches y routers en oficina central. Se implementó topología en estrella.', 'APROBADO'),
+  ('uuid-del-alumno', '2025-06-02', 3, 'Mantenimiento de equipos', 'Limpieza y diagnóstico de 15 estaciones de trabajo. Se reemplazaron 2 discos duros.', 'APROBADO'),
+  ('uuid-del-alumno', '2025-06-03', 5, 'Desarrollo de módulo web', 'Implementación del módulo de autenticación con JWT en React. Pruebas unitarias exitosas.', 'PENDIENTE');</div>
 
-  <h3 class="sub">Credenciales de Prueba para Copiar y Pegar</h3>
+  <h3 class="sub">Datos de Prueba para Copiar y Pegar</h3>
   <table>
-    <thead><tr><th>Rol</th><th>Email</th><th>Contraseña</th><th>Nombre</th></tr></thead>
+    <thead><tr><th>Rol</th><th>Email</th><th>Contraseña</th><th>Nombre Completo</th><th>Clave Docente</th></tr></thead>
     <tbody>
-      <tr><td><span class="badge badge-green">ALUMNO</span></td><td><code>alumno@test.com</code></td><td><code>Test123!</code></td><td>Carlos Andrés Medina</td></tr>
-      <tr><td><span class="badge badge-amber">PROFESOR</span></td><td><code>profesor@test.com</code></td><td><code>Test123!</code></td><td>Dr. María Fernanda López</td></tr>
+      <tr><td><span class="badge badge-green">ALUMNO</span></td><td><code>alumno@test.com</code></td><td><code>Test123!</code></td><td>Carlos Andrés Medina</td><td>—</td></tr>
+      <tr><td><span class="badge badge-amber">PROFESOR 1</span></td><td><code>profesor1@test.com</code></td><td><code>Test123!</code></td><td>Juan Carlos Pérez García</td><td><code>DOC-2026-UTE-LVT</code></td></tr>
+      <tr><td><span class="badge badge-amber">PROFESOR 2</span></td><td><code>profesor2@test.com</code></td><td><code>Test123!</code></td><td>María Fernanda López Ruiz</td><td><code>DOC-2026-UTE-LVT</code></td></tr>
     </tbody>
   </table>
-  <p><strong>Nota:</strong> Registra ambos usuarios manualmente desde la UI con los datos de la tabla. Los perfiles en <code>profiles</code> se crean automáticamente. Luego ejecuta el INSERT de <code>student_data</code> con el UUID real del alumno.</p>
+  <div class="note info"><strong>📝 Cómo probar:</strong> Registra los 3 usuarios manualmente desde la UI. El alumno usa el formulario de "Alumno". Los dos profesores usan el formulario de "Profesor" con la misma clave <code>DOC-2026-UTE-LVT</code>. Ambos deben registrarse sin error. Luego ejecuta el INSERT de <code>student_data</code> con el UUID real del alumno.</div>
 
   <h3 class="sub">Migración: Agregar Faculty/Career a Profiles</h3>
   <p>Para que el nuevo flujo funcione, ejecuta esta migración en el SQL Editor de Supabase:</p>
@@ -1387,7 +1429,7 @@ UPDATE profiles SET faculty = 'Facultad de Ingenierías', career = 'Tecnologías
   </table>
   <p><strong>Nuevo flujo:</strong> El profesor ya no necesita contraseña de curso. Al registrarse, selecciona su facultad y carrera. Al iniciar sesión, solo elige ciclo y paralelo para ver sus estudiantes.</p>
 
-  <div class="note warn">⚠ <strong>Consulta SQL para obtener el UUID del alumno:</strong><br><code>SELECT id, email FROM profiles WHERE email = 'alumno@test.com';</code></div>
+  <div class="note warn">⚠ <strong>Para obtener el UUID después del registro:</strong><br><code>SELECT id, email, role FROM profiles;</code></div>
 </div>
 
 <div class="page">
@@ -1446,7 +1488,7 @@ UPDATE profiles SET faculty = 'Facultad de Ingenierías', career = 'Tecnologías
       <tr><td>2</td><td>Seleccionar rol "Profesor", llenar nombre completo (ej: <code>Luis Fernando Pérez Gómez</code>)</td><td>Correo se auto-genera: <code>luis.perez.gomez@utelvt.edu.ec</code> (campo deshabilitado)</td></tr>
       <tr><td>3</td><td>Seleccionar facultad, carrera e ingresar contraseña y clave docente</td><td>—</td></tr>
       <tr><td>4</td><td>Hacer clic en "Crear Cuenta"</td><td>Registro exitoso, redirige al login con email/contraseña pre-rellenados</td></tr>
-      <tr><td>5</td><td>Intentar registrar otro profesor con la misma clave docente</td><td>Error: "Esta clave de registro ya fue utilizada"</td></tr>
+      <tr><td>5</td><td>Registrar otro profesor con la MISMA clave docente y diferente correo</td><td>✅ Registro exitoso (la clave NO es única, cualquier cantidad de docentes puede usarla)</td></tr>
       <tr><td>6</td><td>Iniciar sesión con las credenciales pre-rellenadas</td><td>Redirige a vista Profesor con sección "Selección de Curso"</td></tr>
     </tbody>
   </table>
