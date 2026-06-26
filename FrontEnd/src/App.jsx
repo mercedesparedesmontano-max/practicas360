@@ -8,7 +8,7 @@ const generarEmailInstitucional = (nombreCompleto) => {
   const partes = nombreCompleto.trim().split(/\s+/);
   if (partes.length < 3) return '';
   const nombre = partes[0];
-  const apellidos = partes.slice(-2);
+  const apellidos = partes.slice(1);
   const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   return [nombre, ...apellidos].map(normalizar).join('.') + '@utelvt.edu.ec';
 };
@@ -39,6 +39,7 @@ export default function App() {
   const [regProfFacultad, setRegProfFacultad] = useState('');
   const [regProfCarrera, setRegProfCarrera] = useState('');
   const [regProfKey, setRegProfKey] = useState('');
+  const [regProfEmailManual, setRegProfEmailManual] = useState(false);
 
   const [vistaAlumno, setVistaAlumno] = useState('informes');
   const [vistaProfesor, setVistaProfesor] = useState('alumnos');
@@ -95,9 +96,13 @@ export default function App() {
     }, 5000);
   };
 
-  const handleCerrarSesion = () => {
+  const handleCerrarSesion = async () => {
+    await supabase.auth.signOut();
     setEmail('');
     setPassword('');
+    setUserLogged(null);
+    setPerfilAlumno({ nombre: '', cedula: '', empresa: '', area: '', tutorEmpresarial: '' });
+    setPerfilDocente({ nombre: '', correo: '' });
     setFiltroFacultad('');
     setFiltroCarrera('');
     setFiltroCiclo('');
@@ -107,6 +112,19 @@ export default function App() {
     setEstudiantesFiltrados([]);
     setIdEstudianteSeleccionado(null);
     setAnalyticsData(null);
+    setRegFullName('');
+    setRegPassword('');
+    setRegFacultad('');
+    setRegCarrera('');
+    setRegCiclo('');
+    setRegParalelo('');
+    setRegProfName('');
+    setRegProfPassword('');
+    setRegProfFacultad('');
+    setRegProfCarrera('');
+    setRegProfKey('');
+    setRole('alumno');
+    setIsRegisterMode(false);
     setIsLoggedIn(false);
   };
 
@@ -376,11 +394,11 @@ export default function App() {
   }, [regFullName, role]);
 
   useEffect(() => {
-    if (role === 'profesor' && regProfName) {
+    if (role === 'profesor' && regProfName && !regProfEmailManual) {
       const g = generarEmailInstitucional(regProfName);
       if (g) setRegProfEmail(g);
     }
-  }, [regProfName, role]);
+  }, [regProfName, role, regProfEmailManual]);
 
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
@@ -464,49 +482,37 @@ export default function App() {
     const targetName = role === 'alumno' ? regFullName : regProfName;
 
     try {
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
+      if (role === 'profesor') {
+        const CLAVE_MAESTRA = "DOC-2026-UTE-LVT";
+        if (regProfKey.trim() !== CLAVE_MAESTRA) {
+          mostrarNotificacion("La clave de registro docente es incorrecta", "error");
+          return;
+        }
+      }
+
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: targetEmail,
-        password: targetPassword
+        password: targetPassword,
       });
 
-      if (authErr) throw authErr;
+      if (authError) throw authError;
 
       const profileData = {
         id: authData.user.id,
-        role: role.toUpperCase(),
+        email: targetEmail,
         full_name: targetName,
-        email: targetEmail
+        role: role.toUpperCase(),
       };
       if (role === 'profesor') {
-        const { data: keyData, error: keyErr } = await supabase
-          .from('teacher_keys')
-          .select('id, used')
-          .eq('key', regProfKey.trim())
-          .single();
-
-        if (keyErr || !keyData) {
-          mostrarNotificacion('Clave de registro docente inválida.', 'error');
-          return;
-        }
-        if (keyData.used) {
-          mostrarNotificacion('Esta clave de registro ya fue utilizada.', 'error');
-          return;
-        }
-
-        await supabase
-          .from('teacher_keys')
-          .update({ used: true })
-          .eq('id', keyData.id);
-
         profileData.faculty = regProfFacultad;
         profileData.career = regProfCarrera;
       }
 
-      const { error: profileErr } = await supabase
-        .from('profiles')
-        .insert([profileData]);
+      const { error: insertError } = await supabase.from('profiles').insert([
+        profileData
+      ]);
 
-      if (profileErr) throw profileErr;
+      if (insertError) throw insertError;
 
       if (role === 'alumno') {
         const { error: studentErr } = await supabase
@@ -525,11 +531,10 @@ export default function App() {
       }
 
       mostrarNotificacion('Registro exitoso. Ahora puede iniciar sesión.', 'exito');
-      setEmail(targetEmail);
-      setPassword(targetPassword);
       setIsRegisterMode(false);
-    } catch (err) {
-      mostrarNotificacion('Error en el registro: ' + err.message, 'error');
+    } catch (error) {
+      console.error(error);
+      mostrarNotificacion(error.message, "error");
     }
   };
 
@@ -822,35 +827,35 @@ export default function App() {
       <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 animate-grid-bg" dir="ltr">
         <BannerNotificacion />
         <nav className="bg-[#007A33] border-b-4 border-[#E60000] text-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Logo UTE-LVT" className="h-10 w-auto object-contain bg-white p-1 rounded-lg" />
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 flex justify-between min-h-14 sm:min-h-16 items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-6 min-w-0">
+              <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Logo UTE-LVT" className="h-8 sm:h-10 w-auto object-contain bg-white p-0.5 sm:p-1 rounded-lg" />
                 <div className="flex flex-col">
-                  <span className="text-base font-black uppercase tracking-wide">Prácticas 360</span>
-                  <span className="text-[9px] font-bold text-slate-100 uppercase tracking-widest">U.T. LVT</span>
+                  <span className="text-[10px] sm:text-base font-black uppercase tracking-wide leading-tight sm:leading-normal">Prácticas 360</span>
+                  <span className="hidden sm:block text-[9px] font-bold text-slate-100 uppercase tracking-widest">U.T. LVT</span>
                 </div>
               </div>
-              <div className="flex gap-1 bg-[#006329] p-1 rounded-xl text-xs font-bold">
-                <button onClick={() => setVistaAlumno('informes')} className={`px-4 py-1.5 rounded-lg transition-all ${vistaAlumno === 'informes' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Informe</button>
-                <button onClick={() => setVistaAlumno('perfil')} className={`px-4 py-1.5 rounded-lg transition-all ${vistaAlumno === 'perfil' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Perfil</button>
+              <div className="flex gap-1 bg-[#006329] p-0.5 sm:p-1 rounded-xl text-[10px] sm:text-xs font-bold overflow-x-auto">
+                <button onClick={() => setVistaAlumno('informes')} className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg transition-all whitespace-nowrap ${vistaAlumno === 'informes' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>INFORME</button>
+                <button onClick={() => setVistaAlumno('perfil')} className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg transition-all whitespace-nowrap ${vistaAlumno === 'perfil' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>PERFIL</button>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-black uppercase text-white">{userLogged?.nombre}</p>
                 <p className="text-[10px] font-bold text-emerald-100 italic">{userLogged?.empresa}</p>
               </div>
-              <button onClick={handleCerrarSesion} className="bg-[#E60000] hover:bg-[#C00000] text-white font-black text-[10px] py-2 px-3 rounded-xl uppercase tracking-wider transition-all shadow-md">Cerrar Sesión</button>
+              <button onClick={handleCerrarSesion} className="bg-[#E60000] hover:bg-[#C00000] text-white font-black text-[8px] sm:text-[10px] py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl uppercase tracking-wider transition-all shadow-md whitespace-nowrap">Salir</button>
             </div>
           </div>
         </nav>
 
         <div className="max-w-6xl mx-auto py-8 px-4">
           {vistaAlumno === 'informes' && (
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
-              <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
+            <div className="bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+              <div className="mt-4 p-3 sm:p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
                 <div>
                   <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">¿Completaste tus horas?</h4>
                   <p className="text-[10px] text-slate-500 font-bold uppercase">Genera automáticamente tu informe institucional en Word</p>
@@ -858,9 +863,9 @@ export default function App() {
                 <button
                   type="button"
                   onClick={generarInformeWordInstitucional}
-                  className="bg-[#007A33] hover:bg-emerald-800 text-white font-black text-[10px] py-3 px-5 rounded-xl uppercase tracking-wider transition-all shadow-md flex items-center gap-2"
+                  className="bg-[#007A33] hover:bg-emerald-800 text-white font-black text-[8px] sm:text-[10px] py-2 sm:py-3 px-3 sm:px-5 rounded-xl uppercase tracking-wider transition-all shadow-md flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center"
                 >
-                   Descargar Formato Institucional (.docx)
+                   Descargar Word (.docx)
                 </button>
               </div>
               <div className="flex justify-between text-[11px] font-bold text-slate-600 mb-1">
@@ -874,13 +879,13 @@ export default function App() {
           )}
 
           {vistaAlumno === 'informes' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm h-fit">
-                <h3 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-4 border-b pb-2">
-                  {idInformeEdicion ? 'Corregir Actividad' : 'Nueva Actividad'}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm h-fit">
+                <h3 className="text-[10px] sm:text-xs font-black text-slate-700 uppercase tracking-wider mb-3 sm:mb-4 border-b pb-2">
+                  {idInformeEdicion ? 'CORREGIR ACTIVIDAD' : 'NUEVA ACTIVIDAD'}
                 </h3>
-                <form onSubmit={(e) => { e.preventDefault(); handleGuardarInforme(); }} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2">
+                <form onSubmit={(e) => { e.preventDefault(); handleGuardarInforme(); }} className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Fecha</label>
                       <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full px-2 py-1.5 border border-slate-200 rounded-xl text-xs font-medium" />
@@ -921,19 +926,19 @@ export default function App() {
 
                   <div className="space-y-2">
                     <button type="submit" className="w-full py-2.5 bg-[#007A33] text-white text-xs font-black uppercase rounded-xl tracking-wider shadow-md">
-                      {idInformeEdicion ? 'Guardar Cambios' : 'Guardar Informe'}
+                      {idInformeEdicion ? 'GUARDAR CAMBIOS' : 'GUARDAR INFORME'}
                     </button>
                     {idInformeEdicion && (
                       <button type="button" onClick={cancelarEdicion} className="w-full py-2 bg-slate-100 text-slate-600 text-xs font-bold uppercase rounded-xl border border-slate-200">
-                        Cancelar Edición
+                        CANCELAR EDICIÓN
                       </button>
                     )}
                   </div>
                 </form>
               </div>
 
-              <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 className="text-xs font-black text-slate-700 uppercase tracking-wider mb-4 border-b pb-2">Bitácora de Prácticas</h3>
+              <div className="lg:col-span-2 bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-[10px] sm:text-xs font-black text-slate-700 uppercase tracking-wider mb-3 sm:mb-4 border-b pb-2">BITÁCORA DE PRÁCTICAS</h3>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y text-xs">
                     <thead className="bg-slate-50 font-bold text-slate-500 uppercase">
@@ -997,10 +1002,10 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <div className="max-w-2xl mx-auto bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h3 className="text-sm font-black text-slate-700 uppercase mb-4 border-b pb-2">Hoja de Vida y Datos de la Práctica</h3>
+            <div className="max-w-2xl mx-auto bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 className="text-sm font-black text-slate-700 uppercase mb-4 border-b pb-2">PERFIL Y DATOS DE LA PRÁCTICA</h3>
               <form onSubmit={handleActualizarPerfil} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase">Nombre del Estudiante</label>
                     <input type="text" required value={perfilAlumno.nombre} onChange={(e) => setPerfilAlumno({...perfilAlumno, nombre: e.target.value})} placeholder="Tu nombre completo" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white font-bold text-slate-800" />
@@ -1010,7 +1015,7 @@ export default function App() {
                     <input type="text" required value={perfilAlumno.cedula} onChange={(e) => setPerfilAlumno({...perfilAlumno, cedula: e.target.value})} placeholder="Ej: 0850xxxxxx" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white font-medium" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase">Facultad</label>
                     <input type="text" disabled value={userLogged?.facultad} className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-slate-500" />
@@ -1021,7 +1026,7 @@ export default function App() {
                   </div>
                 </div>
                 <hr className="border-slate-100" />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase">Empresa / Institución</label>
                     <input type="text" required value={perfilAlumno.empresa} onChange={(e) => setPerfilAlumno({...perfilAlumno, empresa: e.target.value})} placeholder="Ej: CNT Esmeraldas" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white font-medium" />
@@ -1035,7 +1040,7 @@ export default function App() {
                   <label className="block text-[10px] font-black text-slate-500 uppercase">Nombre del Tutor Empresarial</label>
                   <input type="text" required value={perfilAlumno.tutorEmpresarial} onChange={(e) => setPerfilAlumno({...perfilAlumno, tutorEmpresarial: e.target.value})} placeholder="Ej: Ing. Gabriel Rivas" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white font-medium" />
                 </div>
-                <button type="submit" className="w-full py-3 bg-[#007A33] text-white font-black text-xs uppercase rounded-xl shadow-md tracking-wider">Guardar Perfil de Prácticas</button>
+                <button type="submit" className="w-full py-3 bg-[#007A33] text-white font-black text-xs uppercase rounded-xl shadow-md tracking-wider">GUARDAR PERFIL DE PRÁCTICAS</button>
               </form>
             </div>
           )}
@@ -1077,31 +1082,31 @@ export default function App() {
           </div>
         )}
         <nav className="bg-[#007A33] border-b-4 border-[#E60000] text-white shadow-md sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Logo UTE-LVT" className="h-10 w-auto object-contain bg-white p-1 rounded-lg" />
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 flex justify-between min-h-14 sm:min-h-16 items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-6 min-w-0">
+              <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Logo UTE-LVT" className="h-8 sm:h-10 w-auto object-contain bg-white p-0.5 sm:p-1 rounded-lg" />
                 <div className="flex flex-col">
-                  <span className="text-base font-black uppercase tracking-wider">Supervisión Académica</span>
-                  <span className="text-[10px] font-bold text-emerald-100 uppercase tracking-widest">UTLVTE - Vinculación</span>
+                  <span className="text-[10px] sm:text-base font-black uppercase tracking-wide leading-tight sm:leading-normal">Supervisión Académica</span>
+                  <span className="hidden sm:block text-[10px] font-bold text-emerald-100 uppercase tracking-widest">UTLVTE - Vinculación</span>
                 </div>
               </div>
 
-              <div className="flex gap-1 bg-[#006329] p-1 rounded-xl text-xs font-bold">
-                <button onClick={() => setVistaProfesor('alumnos')} className={`px-4 py-1.5 rounded-lg transition-all ${vistaProfesor === 'alumnos' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Alumnos</button>
+              <div className="flex gap-1 bg-[#006329] p-0.5 sm:p-1 rounded-xl text-[10px] sm:text-xs font-bold overflow-x-auto">
+                <button onClick={() => setVistaProfesor('alumnos')} className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg transition-all whitespace-nowrap ${vistaProfesor === 'alumnos' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>ALUMNOS</button>
                 {cursoDesbloqueado && (
-                  <button onClick={() => { setVistaProfesor('dashboard'); fetchAnalyticsData(); }} className={`px-4 py-1.5 rounded-lg transition-all ${vistaProfesor === 'dashboard' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Dashboard</button>
+                  <button onClick={() => { setVistaProfesor('dashboard'); fetchAnalyticsData(); }} className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg transition-all whitespace-nowrap ${vistaProfesor === 'dashboard' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Dashboard</button>
                 )}
-                <button onClick={() => setVistaProfesor('perfil')} className={`px-4 py-1.5 rounded-lg transition-all ${vistaProfesor === 'perfil' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>Mi Perfil</button>
+                <button onClick={() => setVistaProfesor('perfil')} className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg transition-all whitespace-nowrap ${vistaProfesor === 'perfil' ? 'bg-white text-[#007A33]' : 'text-emerald-100'}`}>MI PERFIL</button>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-black uppercase text-white">{userLogged?.nombre}</p>
                 <p className="text-[9px] font-bold text-emerald-200 uppercase tracking-wider">Docente Tutor</p>
               </div>
-              <button onClick={handleCerrarSesion} className="bg-[#E60000] hover:bg-[#C00000] text-white font-black text-[10px] py-2 px-4 rounded-xl uppercase tracking-wider transition-all">Cerrar Sesión</button>
+              <button onClick={handleCerrarSesion} className="bg-[#E60000] hover:bg-[#C00000] text-white font-black text-[8px] sm:text-[10px] py-1.5 sm:py-2 px-2 sm:px-4 rounded-xl uppercase tracking-wider transition-all whitespace-nowrap">Salir</button>
             </div>
           </div>
         </nav>
@@ -1109,7 +1114,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto py-6 px-4">
           {vistaProfesor === 'perfil' ? (
             <div className="max-w-lg mx-auto bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <h3 className="text-sm font-black text-slate-700 uppercase mb-4 border-b pb-2">Mis Datos de Docente</h3>
+              <h3 className="text-sm font-black text-slate-700 uppercase mb-4 border-b pb-2">MIS DATOS DE DOCENTE</h3>
               <form onSubmit={handleActualizarPerfilDocente} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Nombre Completo</label>
@@ -1119,7 +1124,7 @@ export default function App() {
                   <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Correo Institucional</label>
                   <input type="email" required value={perfilDocente.correo} onChange={(e) => setPerfilDocente({ ...perfilDocente, correo: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white font-medium text-slate-700 outline-none focus:border-[#007A33]" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Facultad</label>
                     <select value={perfilDocente.facultad} onChange={(e) => { setPerfilDocente({ ...perfilDocente, facultad: e.target.value }); setCursoDesbloqueado(false); }} className="w-full p-2 border border-slate-200 rounded-xl text-xs font-semibold bg-white outline-none">
@@ -1135,7 +1140,7 @@ export default function App() {
                     </select>
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-[#007A33] hover:bg-emerald-800 text-white font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all shadow-md">Actualizar Datos Institucionales</button>
+                <button type="submit" className="w-full bg-[#007A33] hover:bg-emerald-800 text-white font-black text-xs py-3 rounded-xl uppercase tracking-wider transition-all shadow-md">ACTUALIZAR DATOS INSTITUCIONALES</button>
               </form>
             </div>
           ) : vistaProfesor === 'dashboard' ? (
@@ -1155,10 +1160,10 @@ export default function App() {
                           </div>
                         </div>
                       </div>
-                      <div className="p-5">
-                        {analyticsData.studentsHoursArray.length > 0 ? (
-                          <ResponsiveContainer width="100%" height={320}>
-                            <BarChart data={analyticsData.studentsHoursArray} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <div className="p-3 sm:p-5">
+                    {analyticsData.studentsHoursArray.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={analyticsData.studentsHoursArray} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                               <XAxis dataKey="shortName" tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} angle={-20} textAnchor="end" height={60} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
                               <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -1271,9 +1276,9 @@ export default function App() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 className="text-xs font-black text-slate-400 uppercase border-b pb-1.5 mb-3">Selección de Curso</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+              <div className="bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-[10px] sm:text-xs font-black text-slate-400 uppercase border-b pb-1.5 mb-3">SELECCIÓN DE CURSO</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4 items-end">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">Facultad</label>
                     <input type="text" value={userLogged?.facultad || filtroFacultad} disabled className="w-full p-2 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-100 text-slate-500" />
@@ -1308,8 +1313,8 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-                  <h4 className="text-xs font-black text-slate-800 uppercase border-b pb-1.5 mb-2">Alumnos ({estudiantesFiltrados.length})</h4>
+                <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                  <h4 className="text-[10px] sm:text-xs font-black text-slate-800 uppercase border-b pb-1.5 mb-2">ALUMNOS ({estudiantesFiltrados.length})</h4>
 
                   {!cursoDesbloqueado ? (
                     <p className="text-emerald-800 text-[11px] font-bold italic bg-emerald-50/60 p-3 rounded-xl border border-emerald-200/50">Seleccione ciclo, paralelo e ingrese la clave del curso.</p>
@@ -1325,11 +1330,11 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="lg:col-span-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm min-h-[300px]">
+                <div className="lg:col-span-3 bg-white p-3 sm:p-5 rounded-2xl border border-slate-200 shadow-sm min-h-[300px]">
                   {estudianteAuditado ? (
                     <div>
                       <div className="border-b pb-3 mb-4">
-                        <h4 className="text-sm font-black text-slate-700 uppercase">Reportes Diarios de: {estudianteAuditado.nombre}</h4>
+                        <h4 className="text-[11px] sm:text-sm font-black text-slate-700 uppercase">REPORTES DE: {estudianteAuditado.nombre}</h4>
                         <p className="text-[11px] text-slate-500 font-medium">Empresa: {estudianteAuditado.empresa} | Departamento: {estudianteAuditado.area}</p>
                       </div>
 
@@ -1389,22 +1394,22 @@ export default function App() {
   }
 
   return (
-      <div className="min-h-screen bg-[#f1f5f9] flex flex-col justify-center items-center py-12 px-4 relative overflow-hidden animate-grid-bg" dir="ltr">
+      <div className="min-h-screen bg-[#f1f5f9] flex flex-col justify-center items-center py-6 sm:py-12 px-3 sm:px-4 relative overflow-hidden animate-grid-bg" dir="ltr">
       <BannerNotificacion />
 
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#007A33]/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#E60000]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="text-center mb-6 space-y-3 relative z-10 animate-float-card flex flex-col items-center">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Escudo Oficial UTE-LVT" className="h-28 w-auto object-contain drop-shadow-xl mb-2" />
+      <div className="text-center mb-4 sm:mb-6 space-y-2 sm:space-y-3 relative z-10 animate-float-card flex flex-col items-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" alt="Escudo Oficial UTE-LVT" className="h-20 sm:h-28 w-auto object-contain drop-shadow-xl mb-1 sm:mb-2" />
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight uppercase">PRACTICAS 360</h1>
-          <div className="h-1 w-24 bg-[#E60000] mx-auto my-1.5 rounded-full animate-pulse-line-green"></div>
-          <p className="text-[10px] font-black text-[#007A33] uppercase tracking-widest">UNIVERSIDAD TÉCNICA LUIS VARGAS TORRES</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase">PRACTICAS 360</h1>
+          <div className="h-1 w-20 sm:w-24 bg-[#E60000] mx-auto my-1 sm:my-1.5 rounded-full animate-pulse-line-green"></div>
+          <p className="hidden sm:block text-[10px] font-black text-[#007A33] uppercase tracking-widest">UNIVERSIDAD TÉCNICA LUIS VARGAS TORRES</p>
         </div>
       </div>
 
-      <div className="glass-container p-8 shadow-2xl rounded-3xl border border-white/60 w-full max-w-lg relative z-10">
+      <div className="glass-container p-4 sm:p-8 shadow-2xl rounded-3xl border border-white/60 w-full max-w-lg relative z-10">
         {isRegisterMode && (
           <div className="mb-6">
             <div className="grid grid-cols-2 gap-2 p-1 bg-slate-200/50 rounded-2xl border border-slate-300/40">
@@ -1450,7 +1455,7 @@ export default function App() {
                   <span className="text-[9px] text-slate-400 font-medium pl-1">Generado automáticamente del nombre</span>
                 </div>
                 <input type="password" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Contraseña" className="block w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs bg-white outline-none" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <select value={regFacultad} onChange={(e) => { setRegFacultad(e.target.value); setRegCarrera(''); }} className="block w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs bg-white font-bold text-slate-700 outline-none">
                     <option value="">Facultad</option>
                     {Object.keys(estructuraUniversitaria).map(f => <option key={f} value={f}>{f}</option>)}
